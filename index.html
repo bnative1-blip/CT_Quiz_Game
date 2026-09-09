@@ -39,6 +39,7 @@
         <span class="gauge-label">Modules</span>
         <span class="gauge-val cool mono" id="gDone">0/25</span>
       </div>
+      <button class="chip player-chip" id="playerBtn" hidden>Sign in</button>
       <button class="icon-btn" id="themeBtn" title="Switch light / dark" aria-label="Switch light or dark theme">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
@@ -146,6 +147,15 @@
     <div class="filters" id="filters"></div>
     <div class="index-grid stagger" id="indexGrid"></div>
 
+    <section id="boardSection" hidden>
+      <div class="sec-head">
+        <h2>Leaderboard</h2>
+        <span class="tag" id="boardTag">Top 10 &middot; 5 modules to qualify</span>
+      </div>
+      <div id="boardNote" class="board-note"></div>
+      <div class="board-wrap"><table class="board" id="board"></table></div>
+    </section>
+
     <div class="sec-head">
       <h2>Commendations</h2>
       <span class="tag" id="badgeTag">0 of 8 earned</span>
@@ -239,6 +249,41 @@
 </section>
 
 </main>
+
+<dialog class="sheet" id="authDlg" aria-labelledby="authTitle">
+  <form id="authForm">
+    <h3 id="authTitle">Player profile</h3>
+    <p class="sheet-lede">
+      A profile carries your progress between browsers and puts you on the leaderboard.
+      You can play without one.
+    </p>
+
+    <label class="field">
+      <span>Handle</span>
+      <input id="authHandle" name="handle" type="text" maxlength="18" autocomplete="username"
+             required placeholder="How you appear on the board">
+    </label>
+
+    <label class="field">
+      <span>Passphrase</span>
+      <input id="authPass" name="pass" type="password" minlength="6" maxlength="128"
+             autocomplete="current-password" required placeholder="At least 6 characters">
+    </label>
+
+    <p class="sheet-warn">
+      This is a game profile, not a secure account. Anyone who can open this page can read
+      the stored profile records, so pick something throwaway &mdash; never reuse a real password.
+    </p>
+
+    <p class="sheet-error" id="authErr" hidden></p>
+
+    <div class="sheet-foot">
+      <button type="button" class="btn btn-ghost" id="authCancel">Cancel</button>
+      <button type="submit" class="btn btn-ghost" id="authCreate" value="create">Create profile</button>
+      <button type="submit" class="btn btn-primary" id="authSignin" value="signin">Sign in</button>
+    </div>
+  </form>
+</dialog>
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 

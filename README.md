@@ -39,7 +39,44 @@ and discharge compliance.
 - **Ranks** — XP carries you from Trainee through Water Tech, Field Chemist, Treatment Specialist and Systems Engineer to Principal.
 - **Commendations** — eight badges: Zero Blowdown (a perfect module), Breakpoint (a 10-answer streak), Free Residual (a module with no timeouts), Full Turnaround (all 25), and the three category sweeps.
 - **Shuffled options** — answer positions are re-randomized on every play, so nothing can be memorized by position and modules are worth replaying.
-- Progress, XP and badges persist in `localStorage`. Nothing leaves the browser.
+- Progress, XP and badges persist in `localStorage`, so you can play without any account at all.
+
+## Profiles and the leaderboard
+
+These two features need the artifact runtime's `db` capability, so they light up only in
+the **published** version. Opened as a local file the page detects their absence, hides
+the sign-in chip and the leaderboard, and plays exactly as before.
+
+- **Profile** — a handle plus a passphrase. Signing in on a second browser merges progress
+  rather than overwriting it: for each module the higher-scoring run wins, and badges union.
+- **Leaderboard** — top 10 by total score, live via `onSnapshot`. Score is the sum of your
+  **best** run of each module, so it is deterministic and replays can only help. A player
+  needs **5 completed modules** to qualify; below that the board shows how many are left.
+  If you qualify but sit outside the top ten, your own standing is appended below the cut.
+
+### Security, stated plainly
+
+There is no `user` capability on this runtime contract, so the page cannot learn who the
+viewer is and has to manage identity itself. That has real limits, and the UI says so:
+
+- Passphrases are **never stored**. Each profile keeps a random 16-byte salt and a
+  PBKDF2-SHA256 hash at 150,000 iterations.
+- The store is readable by anyone who can open the page, so those salts and hashes are
+  visible to other players. PBKDF2 makes guessing expensive, not impossible. **Treat the
+  passphrase as throwaway and never reuse a real one.**
+- Writes are last-writer-wins with no per-player enforcement, so this is a friendly
+  scoreboard among people who can already open the artifact, not a tamper-proof ranking.
+
+Data layout:
+
+```
+players/<pid>       handle, salt, hash, iter, results, badges, xp, bestStreak
+leaderboard/<pid>   handle, score, modules, accuracy      (eligible players only)
+```
+
+Keeping the board in its own collection means the top-10 read needs no filter beside its
+`orderBy`, and never touches the records holding auth material. Profile writes use
+`update()`, never `set()`, so a progress sync cannot clobber the salt and hash.
 
 ## Layout
 

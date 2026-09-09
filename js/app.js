@@ -44,7 +44,7 @@
   var timer = null;
 
   function blank() {
-    return { xp: 0, bestStreak: 0, results: {}, badges: [], theme: null };
+    return { xp: 0, bestStreak: 0, results: {}, badges: [], theme: null, profile: null };
   }
 
   function load() {
@@ -460,6 +460,7 @@
 
     checkBadges();
     save();
+    syncUp();
 
     $("dTag").textContent = tagOf(t) + " · " + t.title;
     $("dGrade").textContent = run.correct + "/" + run.queue.length;
@@ -502,6 +503,7 @@
 
     run = null;
     renderRail(); renderIndex(); renderBadges();
+    if (db) renderBoard(lastBoardDocs);
     show("debrief");
   }
 
@@ -536,7 +538,8 @@
     if (!confirm("Clear all progress, XP and commendations stored in this browser?")) return;
     state = blank();
     save(); applyTheme();
-    renderRail(); renderIndex(); renderBadges();
+    renderRail(); renderIndex(); renderBadges(); renderPlayer();
+    if (db) { renderBoard(lastBoardDocs); }
     toast("Progress cleared", "Starting from the top");
   });
 
@@ -650,6 +653,341 @@
     }, 2600);
   })();
 
+  /* ============================================================
+     Profile + leaderboard (published Artifact only)
+
+     Identity: this contract exposes no `user` capability, so the page
+     cannot learn who the viewer is. A profile is therefore a handle plus
+     a passphrase, verified against a PBKDF2-SHA256 hash. The store is
+     readable by anyone who can open the page, so the passphrase itself is
+     never stored and the UI says plainly that this is a game profile, not
+     a secure account.
+
+     Two collections:
+       players/<pid>     profile + full progress (auth material lives here)
+       leaderboard/<pid> handle, score, modules, accuracy — eligible players
+                         only, so the top-10 read needs no filter and never
+                         touches the auth records.
+     ============================================================ */
+
+  var ELIGIBLE_MODULES = 5;
+  var BOARD_SIZE = 10;
+  var PBKDF2_ITER = 150000;
+
+  var db = null;             // resolved capability, or null
+  var boardStop = null;      // onSnapshot unsubscribe
+  var lastBoardDocs = null;  // last delivered rows, so the note can re-render alone
+
+  /* ---- derived, mergeable totals ---- */
+
+  function totals(s) {
+    var score = 0, mods = 0, correct = 0;
+    for (var k in s.results) {
+      mods++;
+      score += s.results[k].score || 0;
+      correct += s.results[k].correct || 0;
+    }
+    return {
+      score: score,
+      modules: mods,
+      accuracy: mods ? Math.round(correct / (mods * 5) * 100) : 0
+    };
+  }
+
+  function eligible(s) { return totals(s).modules >= ELIGIBLE_MODULES; }
+
+  /* ---- crypto ---- */
+
+  function hasCrypto() {
+    return !!(window.crypto && window.crypto.subtle && window.crypto.getRandomValues);
+  }
+
+  function toHex(buf) {
+    return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+      return ("0" + b.toString(16)).slice(-2);
+    }).join("");
+  }
+
+  function fromHex(hex) {
+    var out = new Uint8Array(hex.length / 2);
+    for (var i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return out;
+  }
+
+  function newSalt() { return toHex(crypto.getRandomValues(new Uint8Array(16))); }
+
+  function derive(pass, saltHex, iter) {
+    return crypto.subtle.importKey(
+      "raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveBits"]
+    ).then(function (key) {
+      return crypto.subtle.deriveBits(
+        { name: "PBKDF2", salt: fromHex(saltHex), iterations: iter, hash: "SHA-256" },
+        key, 256);
+    }).then(toHex);
+  }
+
+  /* ---- handles ---- */
+
+  function pidFor(handle) {
+    var p = handle.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    return p.slice(0, 40);
+  }
+
+  /* ---- sync ---- */
+
+  function syncUp() {
+    if (!db || !state.profile) return Promise.resolve();
+    var t = totals(state);
+    var pid = state.profile.pid;
+
+    return db.doc("players/" + pid).update({
+      results: state.results,
+      badges: state.badges,
+      xp: state.xp,
+      bestStreak: state.bestStreak,
+      updated: Date.now()
+    }).then(function () {
+      if (t.modules < ELIGIBLE_MODULES) return;
+      return db.doc("leaderboard/" + pid).set({
+        handle: state.profile.handle,
+        score: t.score,
+        modules: t.modules,
+        accuracy: t.accuracy,
+        updated: Date.now()
+      });
+    }).catch(function (e) {
+      toast("Could not save to your profile", (e && e.code) || "offline");
+    });
+  }
+
+  // Take the better of each module, so signing in on a second device
+  // merges rather than clobbers.
+  function mergeDown(remote) {
+    var r = remote.results || {};
+    for (var k in r) {
+      var mine = state.results[k];
+      if (!mine || (r[k].score || 0) > (mine.score || 0)) state.results[k] = r[k];
+      else if (mine && r[k].noTimeouts) state.results[k].noTimeouts = true;
+    }
+    (remote.badges || []).forEach(function (b) {
+      if (state.badges.indexOf(b) < 0) state.badges.push(b);
+    });
+    state.xp = Math.max(state.xp || 0, remote.xp || 0);
+    state.bestStreak = Math.max(state.bestStreak || 0, remote.bestStreak || 0);
+  }
+
+  /* ---- auth ---- */
+
+  var dlg = $("authDlg");
+
+  function openAuth() {
+    if (state.profile) { signOut(); return; }
+    $("authErr").hidden = true;
+    $("authPass").value = "";
+    dlg.showModal();
+    $("authHandle").focus();
+  }
+
+  function authError(msg) {
+    var n = $("authErr");
+    n.textContent = msg;
+    n.hidden = false;
+  }
+
+  function busy(on) {
+    $("authCreate").disabled = on;
+    $("authSignin").disabled = on;
+    $("authSignin").textContent = on ? "Working…" : "Sign in";
+  }
+
+  var mode = "signin";
+  $("authCreate").addEventListener("click", function () { mode = "create"; });
+  $("authSignin").addEventListener("click", function () { mode = "signin"; });
+  $("authCancel").addEventListener("click", function () { dlg.close(); });
+
+  $("authForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if (!db) { authError("The leaderboard is not available in this copy of the page."); return; }
+    if (!hasCrypto()) { authError("This browser cannot hash passphrases securely."); return; }
+
+    var handle = $("authHandle").value.trim();
+    var pass = $("authPass").value;
+    var pid = pidFor(handle);
+
+    if (pid.length < 2) { authError("Pick a handle with at least two letters or digits."); return; }
+    if (pass.length < 6) { authError("Passphrase must be at least 6 characters."); return; }
+
+    $("authErr").hidden = true;
+    busy(true);
+
+    var ref = db.doc("players/" + pid);
+    ref.get().then(function (snap) {
+      var exists = snap.exists;
+      var doc = exists ? snap.data() : null;
+
+      if (mode === "create") {
+        if (exists) throw { soft: "That handle is taken. Sign in instead, or pick another." };
+        var salt = newSalt();
+        return derive(pass, salt, PBKDF2_ITER).then(function (hash) {
+          return ref.set({
+            handle: handle, salt: salt, hash: hash, iter: PBKDF2_ITER,
+            results: state.results, badges: state.badges,
+            xp: state.xp, bestStreak: state.bestStreak,
+            created: Date.now(), updated: Date.now()
+          });
+        }).then(function () { return { handle: handle, fresh: true }; });
+      }
+
+      if (!exists) throw { soft: "No profile with that handle. Use “Create profile”." };
+      return derive(pass, doc.salt, doc.iter || PBKDF2_ITER).then(function (hash) {
+        if (hash !== doc.hash) throw { soft: "Handle and passphrase do not match." };
+        mergeDown(doc);
+        return { handle: doc.handle || handle, fresh: false };
+      });
+    }).then(function (res) {
+      state.profile = { pid: pid, handle: res.handle };
+      checkBadges();
+      save();
+      dlg.close();
+      renderRail(); renderIndex(); renderBadges(); renderPlayer();
+      toast("Signed in as " + res.handle,
+        res.fresh ? "Progress will save to this profile" : "Progress merged");
+      return syncUp().then(watchBoard);
+    }).catch(function (err) {
+      authError(err && err.soft ? err.soft
+        : "Could not reach the profile store" + (err && err.code ? " (" + err.code + ")" : "") + ".");
+    }).then(function () { busy(false); });
+  });
+
+  function signOut() {
+    if (!confirm("Sign out? Progress stays in this browser and in your profile.")) return;
+    state.profile = null;
+    save();
+    renderPlayer(); renderBoard(null);
+    toast("Signed out", "Playing locally");
+  }
+
+  function renderPlayer() {
+    var btn = $("playerBtn");
+    if (!db) { btn.hidden = true; return; }
+    btn.hidden = false;
+    btn.textContent = "";
+    if (state.profile) {
+      btn.dataset.on = "1";
+      btn.appendChild(el("span", "", state.profile.handle));
+      btn.title = "Signed in as " + state.profile.handle + " — click to sign out";
+    } else {
+      delete btn.dataset.on;
+      btn.appendChild(el("span", "", "Sign in"));
+      btn.title = "Create a profile or sign in";
+    }
+  }
+
+  /* ---- leaderboard ---- */
+
+  function watchBoard() {
+    if (!db) return;
+    if (boardStop) { boardStop(); boardStop = null; }
+    boardStop = db.collection("leaderboard")
+      .orderBy("score", "desc")
+      .limit(BOARD_SIZE)
+      .onSnapshot(
+        function (snap) { lastBoardDocs = snap.docs; renderBoard(snap.docs); },
+        function (e) { renderBoard(null, (e && e.code) || "unavailable"); }
+      );
+  }
+
+  function renderBoard(docs, errCode) {
+    var sec = $("boardSection");
+    if (!db) { sec.hidden = true; return; }
+    sec.hidden = false;
+
+    var t = totals(state);
+    var mine = state.profile ? state.profile.pid : null;
+    var note = $("boardNote");
+    var inTop = false;
+
+    var table = $("board");
+    table.textContent = "";
+
+    if (errCode) {
+      table.appendChild(rowSpan("Leaderboard unavailable (" + errCode + ")"));
+    } else if (!docs || !docs.length) {
+      table.appendChild(rowSpan("No qualifying players yet. Finish "
+        + ELIGIBLE_MODULES + " modules to open the board."));
+    } else {
+      var head = document.createElement("tr");
+      ["", "Player", "Score", "Modules", "Accuracy"].forEach(function (h) {
+        head.appendChild(el("th", "", h));
+      });
+      table.appendChild(head);
+
+      docs.forEach(function (d, i) {
+        var v = d.data() || {};
+        var tr = document.createElement("tr");
+        if (i === 0) tr.className = "lead";
+        if (mine && d.id === mine) { tr.className += " me"; inTop = true; }
+        tr.appendChild(el("td", "", String(i + 1)));
+        tr.appendChild(el("td", "who", v.handle || d.id));
+        tr.appendChild(el("td", "", (v.score || 0).toLocaleString()));
+        tr.appendChild(el("td", "", (v.modules || 0) + "/" + TOPICS.length));
+        tr.appendChild(el("td", "", (v.accuracy || 0) + "%"));
+        table.appendChild(tr);
+      });
+
+      // your own standing, when you qualify but sit outside the top ten
+      if (mine && !inTop && t.modules >= ELIGIBLE_MODULES) {
+        var tr2 = document.createElement("tr");
+        tr2.className = "me pending";
+        tr2.appendChild(el("td", "", "—"));
+        tr2.appendChild(el("td", "who", state.profile.handle));
+        tr2.appendChild(el("td", "", t.score.toLocaleString()));
+        tr2.appendChild(el("td", "", t.modules + "/" + TOPICS.length));
+        tr2.appendChild(el("td", "", t.accuracy + "%"));
+        table.appendChild(tr2);
+      }
+    }
+
+    // eligibility / next-step line
+    note.textContent = "";
+    if (!state.profile) {
+      note.appendChild(document.createTextNode(
+        "You are playing locally. Create a profile to carry progress between browsers and post a score. "));
+      note.appendChild(el("b", "", t.modules + " of " + ELIGIBLE_MODULES + " qualifying modules done."));
+    } else if (t.modules < ELIGIBLE_MODULES) {
+      note.appendChild(document.createTextNode("Finish "));
+      note.appendChild(el("b", "", (ELIGIBLE_MODULES - t.modules) + " more module"
+        + (ELIGIBLE_MODULES - t.modules === 1 ? "" : "s")));
+      note.appendChild(document.createTextNode(
+        " to qualify. Your score counts your best run of each module, so replays can only help."));
+    }
+    $("boardTag").textContent = "Top " + BOARD_SIZE + " · " + ELIGIBLE_MODULES + " modules to qualify";
+  }
+
+  function rowSpan(text) {
+    var tr = document.createElement("tr");
+    var td = el("td", "board-empty", text);
+    td.colSpan = 5;
+    tr.appendChild(td);
+    return tr;
+  }
+
+  /* ---- bring the capability up ---- */
+
+  (function connect() {
+    renderBoard(null);                       // renders nothing until db resolves
+    if (!(window.claude && typeof window.claude.use === "function")) return;
+    window.claude.use("db").then(function (ns) {
+      if (!ns) return;
+      db = ns;
+      renderPlayer();
+      watchBoard();
+      if (state.profile) syncUp();
+    }).catch(function () { /* stays local-only */ });
+  })();
+
+  $("playerBtn").addEventListener("click", openAuth);
+
   /* ---------------- boot ---------------- */
 
   applyTheme();
@@ -657,5 +995,6 @@
   renderFilters();
   renderIndex();
   renderBadges();
+  renderPlayer();
   show("console");
 })();
