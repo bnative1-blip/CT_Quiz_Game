@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cooling Tower Chemistry Challenge</title>
+<meta name="description" content="A gamified training game on refinery cooling water treatment: 25 briefings and 125 questions on scale, corrosion, biofouling and process contamination.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="rail">
+  <div class="rail-in">
+    <button class="brand" id="homeBtn" title="Back to the module index">
+      <svg class="brand-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 21h16M6 21V9h12v12M6 9l2-5h8l2 5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M9.5 4c0-1.4 1-2.2 1-3M14 4c0-1.4 1-2.2 1-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" opacity=".55"/>
+      </svg>
+      <span>Cooling Tower Chemistry</span>
+    </button>
+
+    <div class="gauges">
+      <div class="gauge">
+        <span class="gauge-label">Rank</span>
+        <span class="gauge-val" id="gRank">Trainee</span>
+      </div>
+      <div class="gauge">
+        <span class="gauge-label">XP</span>
+        <span class="gauge-val hot mono" id="gXp">0</span>
+      </div>
+      <div class="gauge">
+        <span class="gauge-label">Streak</span>
+        <span class="gauge-val mono" id="gStreak">0</span>
+      </div>
+      <div class="gauge">
+        <span class="gauge-label">Modules</span>
+        <span class="gauge-val cool mono" id="gDone">0/25</span>
+      </div>
+      <button class="icon-btn" id="themeBtn" title="Switch light / dark" aria-label="Switch light or dark theme">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <div class="level-track"><div class="level-fill" id="levelFill"></div></div>
+</header>
+
+<main>
+
+<!-- ============ CONSOLE ============ -->
+<section class="view" id="view-console">
+  <div class="wrap">
+
+    <div class="hero">
+      <div>
+        <div class="eyebrow">Refinery water treatment &middot; 25 modules</div>
+        <h1>Keep the tower <em>clean, cool</em> and out of trouble.</h1>
+        <p class="hero-lede">
+          Read a briefing on one piece of cooling water chemistry, then prove it under a
+          draining residual clock. Twenty-five modules, 125 questions, drawn from standard
+          industry references.
+        </p>
+        <div class="hero-cta">
+          <button class="btn btn-primary" id="startBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+            <span id="startLabel">Start first module</span>
+          </button>
+          <button class="btn btn-ghost" id="randomBtn">Random module</button>
+        </div>
+      </div>
+
+      <div class="tower-stage" role="img" aria-label="Schematic of an induced-draft cooling tower with plume, basin, hot return and cold supply piping">
+        <canvas id="plume"></canvas>
+        <svg viewBox="0 0 400 340" fill="none" aria-hidden="true">
+          <!-- fan stack -->
+          <path d="M168 92h64v30h-64z" fill="var(--surface-3)" stroke="var(--line-2)" stroke-width="1.5"/>
+          <ellipse cx="200" cy="92" rx="32" ry="7" fill="var(--surface-2)" stroke="var(--line-2)" stroke-width="1.5"/>
+          <g class="fan" style="transform-origin:200px 92px">
+            <path d="M200 92 L226 88 M200 92 L213 108 M200 92 L187 108 M200 92 L174 88" stroke="var(--teal)" stroke-width="2.4" stroke-linecap="round"/>
+          </g>
+          <circle cx="200" cy="92" r="3.4" fill="var(--teal)"/>
+
+          <!-- tower shell -->
+          <path d="M124 122h152v112H124z" fill="var(--surface-2)" stroke="var(--line-2)" stroke-width="1.6"/>
+          <!-- fill pack -->
+          <path d="M136 150h128v58H136z" fill="var(--teal-soft)" stroke="var(--line)" stroke-width="1.2"/>
+          <path d="M136 158h128M136 168h128M136 178h128M136 188h128M136 198h128" stroke="var(--plume)" stroke-width="1" opacity=".55"/>
+          <!-- distribution header + nozzles -->
+          <path d="M136 140h128" stroke="var(--amber)" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M152 141v6M176 141v6M200 141v6M224 141v6M248 141v6" stroke="var(--amber)" stroke-width="1.6" stroke-linecap="round"/>
+          <!-- drift eliminators -->
+          <path d="M136 130l10 8M156 130l10 8M176 130l10 8M196 130l10 8M216 130l10 8M236 130l10 8M252 130l10 8" stroke="var(--ink-3)" stroke-width="1.2" opacity=".7"/>
+          <!-- air louvers -->
+          <path d="M124 216l14 8M124 226l14 8M262 216l14 8M262 226l14 8" stroke="var(--ink-3)" stroke-width="1.3"/>
+          <!-- basin -->
+          <path d="M112 234h176v22H112z" fill="var(--teal-soft)" stroke="var(--line-2)" stroke-width="1.6"/>
+          <path d="M112 242h176" stroke="var(--teal)" stroke-width="1.1" opacity=".65"/>
+          <!-- piping: hot return in, cold supply out -->
+          <path d="M62 140h62" stroke="var(--bad)" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M62 140v34" stroke="var(--bad)" stroke-width="2.6" stroke-linecap="round"/>
+          <path d="M112 250H62v-34" stroke="var(--teal)" stroke-width="2.6" stroke-linecap="round"/>
+          <circle cx="62" cy="195" r="13" fill="var(--surface)" stroke="var(--ink-3)" stroke-width="1.6"/>
+          <path d="M55 195h14M62 188v14" stroke="var(--ink-3)" stroke-width="1.4"/>
+          <!-- makeup + blowdown -->
+          <path d="M330 200h-42v46" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 4"/>
+          <path d="M288 256h44" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 4"/>
+          <!-- grade line -->
+          <path d="M40 268h320" stroke="var(--line-2)" stroke-width="1.4"/>
+          <!-- labels -->
+          <g font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing=".08em" fill="var(--ink-3)">
+            <text x="66" y="133">HOT RETURN</text>
+            <text x="66" y="286">COLD SUPPLY</text>
+            <text x="334" y="203">MAKEUP</text>
+            <text x="336" y="259">BLOWDOWN</text>
+            <text x="292" y="128">DRIFT ELIM.</text>
+            <text x="292" y="182">FILL</text>
+            <text x="240" y="96" fill="var(--teal)">FAN</text>
+          </g>
+        </svg>
+        <div class="stage-caption">Unit CT-1 &middot; induced draft, crossflow</div>
+        <div class="stage-readout" aria-hidden="true">
+          CYCLES <b id="rdCyc">5.2</b><br>
+          pH <b id="rdPh">8.4</b><br>
+          ORP <b id="rdOrp">612</b> mV<br>
+          LSI <b id="rdLsi">+1.8</b>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-head">
+      <h2>Training modules</h2>
+      <span class="tag" id="progressTag">0 of 25 complete</span>
+    </div>
+
+    <div class="filters" id="filters"></div>
+    <div class="index-grid stagger" id="indexGrid"></div>
+
+    <div class="sec-head">
+      <h2>Commendations</h2>
+      <span class="tag" id="badgeTag">0 of 8 earned</span>
+    </div>
+    <div class="badge-grid" id="badgeGrid"></div>
+
+    <div class="foot">
+      Briefings compiled from publicly available industry literature: the Nalco Water Handbook,
+      the Betz Handbook of Industrial Water Conditioning, CTI and ASHRAE guidance
+      (including ANSI/ASHRAE Standard 188), NACE/AMPP corrosion practice, and CDC Legionella
+      guidance. Training material only &mdash; it does not replace site procedures, permits,
+      or your treatment supplier's program recommendations.
+      <br>Progress is stored in this browser only.
+      <button class="chip" id="resetBtn" style="margin-top:12px">Reset progress</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BRIEFING ============ -->
+<section class="view" id="view-brief" hidden>
+  <div class="wrap">
+    <div class="brief-head">
+      <div class="brief-meta">
+        <span class="unit-id mono" id="bTag">CW-101</span>
+        <span class="tag" id="bCat">Fundamentals</span>
+        <span class="tag" id="bDiff">Level 1</span>
+        <span class="tag" id="bRead">3 min read</span>
+      </div>
+      <h1 class="brief-title" id="bTitle">Title</h1>
+    </div>
+    <div class="brief-grid">
+      <div class="brief-body" id="bBody"></div>
+      <aside class="aside">
+        <h4>Nomenclature</h4>
+        <ul class="term-list" id="bTerms"></ul>
+      </aside>
+    </div>
+    <div class="brief-foot">
+      <span class="tag">5 questions &middot; 20 s residual clock each</span>
+      <button class="btn btn-ghost" id="bBack">Back to index</button>
+      <button class="btn btn-primary" id="bStart">Take the quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUIZ ============ -->
+<section class="view" id="view-quiz" hidden>
+  <div class="wrap">
+    <div class="quiz">
+      <div class="q-head">
+        <span class="q-count mono" id="qCount">Question 1 of 5</span>
+        <span class="tag" aria-hidden="true">&middot;</span>
+        <span class="tag" id="qTopic">CW-101</span>
+        <span class="combo mono" id="qCombo">STREAK &times;1.0</span>
+      </div>
+      <div class="residual" id="residual" title="Free residual — answer before it runs out">
+        <div class="residual-fill" id="residualFill"></div>
+      </div>
+      <h2 class="q-text" id="qText">Question</h2>
+      <div class="opts" id="qOpts"></div>
+      <div id="qVerdict"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DEBRIEF ============ -->
+<section class="view" id="view-debrief" hidden>
+  <div class="wrap">
+    <div class="debrief">
+      <span class="tag" id="dTag">CW-101 &middot; Module complete</span>
+      <div class="grade mono" id="dGrade">5/5</div>
+      <h2 id="dHead">Textbook run.</h2>
+      <p class="debrief-sub" id="dSub">Sub</p>
+
+      <div class="stat-row">
+        <div class="stat"><div class="stat-v mono" id="dScore">0</div><div class="stat-k">Points</div></div>
+        <div class="stat"><div class="stat-v mono" id="dAcc">0%</div><div class="stat-k">Accuracy</div></div>
+        <div class="stat"><div class="stat-v mono" id="dBest">0</div><div class="stat-k">Best streak</div></div>
+        <div class="stat"><div class="stat-v mono" id="dXp">+0</div><div class="stat-k">XP earned</div></div>
+      </div>
+
+      <div class="review" id="dReview"></div>
+
+      <div class="hero-cta" style="justify-content:center">
+        <button class="btn btn-ghost" id="dRetry">Retry module</button>
+        <button class="btn btn-ghost" id="dIndex">Back to index</button>
+        <button class="btn btn-primary" id="dNext">Next module</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="js/topics.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

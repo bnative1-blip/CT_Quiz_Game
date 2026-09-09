@@ -1,0 +1,793 @@
+/*
+ * Cooling Tower Chemistry Challenge - Topic Database
+ * -------------------------------------------------
+ * 25 briefings on refinery open-recirculating cooling water treatment,
+ * compiled from publicly available industry literature: the Nalco Water
+ * Handbook, Betz Handbook of Industrial Water Conditioning, ASHRAE and
+ * CTI (Cooling Technology Institute) guidance, NACE/AMPP corrosion
+ * practice, EPRI and API operating guidance, and CDC/OSHA Legionella
+ * guidance.
+ *
+ * Each record: 3-4 paragraph briefing + 5 multiple-choice questions.
+ * `answer` is the zero-based index of the correct option.
+ */
+
+const TOPICS = [
+{
+  id: 1,
+  title: "Cooling Tower Water Balance",
+  category: "Fundamentals",
+  difficulty: 1,
+  blurb: "Evaporation, drift and blowdown - the three ways water leaves the loop.",
+  paragraphs: [
+    "An open recirculating cooling system rejects heat by evaporating a small fraction of the water flowing over the tower fill. Because evaporation removes essentially pure water vapor and leaves dissolved solids behind, every gallon evaporated makes the remaining water slightly more concentrated. The entire discipline of cooling water treatment exists to manage the consequences of that concentration process. A refinery tower circulating 40,000 gpm across a 20 degrees F range will evaporate roughly 800 gpm continuously, which is why cooling towers are typically the single largest water consumer on a refinery site.",
+    "Water leaves the loop by three routes. Evaporation (E) is the useful loss and is estimated by the rule of thumb that about 1 percent of the circulating rate evaporates for every 10 degrees F of cooling range, so E is approximately R times the range divided by 1000, where R is the recirculation rate in gpm. Drift (D) is liquid water carried out of the tower as entrained droplets in the exhaust air. Drift carries dissolved solids with it, so it acts like an uncontrolled blowdown. Modern drift eliminators hold drift to roughly 0.001 to 0.005 percent of the circulating rate, low enough that many mass balances ignore it, though it remains critical for Legionella and for deposition on nearby equipment.",
+    "Blowdown (B), also called bleed, is water deliberately discharged to purge dissolved solids and hold concentration at a target. Makeup (M) is fresh water added to replace all three losses, so the overall balance is M = E + D + B. Because makeup carries in solids and evaporation carries none out, the steady-state solids concentration is set by how aggressively blowdown is run. Operators express that setpoint as cycles of concentration.",
+    "Understanding the balance matters because every treatment decision is an economic and mechanical trade-off between water, chemistry and equipment life. Cutting blowdown saves makeup water and sewer charges but drives up hardness, alkalinity and silica, pushing the system toward scale. Increasing blowdown protects heat-transfer surfaces but wastes water, wastes the inhibitor dissolved in that water, and raises discharge volume. The water balance is the arithmetic that lets an engineer put numbers on that trade-off."
+  ],
+  keyTerms: ["Evaporation", "Drift", "Blowdown", "Makeup", "Cooling range"],
+  questions: [
+    { q: "A tower circulates 30,000 gpm across a 15 degrees F range. Using the standard rule of thumb, roughly how much water evaporates?",
+      options: ["45 gpm", "450 gpm", "4,500 gpm", "150 gpm"], answer: 1,
+      why: "E is approximately R x range / 1000 = 30,000 x 15 / 1000 = 450 gpm. The rule of thumb is about 1 percent of circulation per 10 degrees F of range." },
+    { q: "Why is drift loss treated differently from evaporation in a solids balance?",
+      options: ["Drift is pure water vapor, evaporation is not", "Drift carries dissolved solids out with it, evaporation does not", "Drift only occurs during winter operation", "Drift is measured in degrees F, not gpm"], answer: 1,
+      why: "Drift is entrained liquid droplets at full recirculating water chemistry, so it removes solids like a blowdown. Evaporation leaves solids behind." },
+    { q: "The overall water balance for an open recirculating tower is best written as:",
+      options: ["M = E - D - B", "M = E + D + B", "B = E + D + M", "E = M + D + B"], answer: 1,
+      why: "Makeup must replace every loss: evaporation, drift and blowdown." },
+    { q: "Typical drift loss from a tower with modern drift eliminators is about:",
+      options: ["1 to 2 percent of circulation", "0.001 to 0.005 percent of circulation", "0.5 to 1 percent of circulation", "5 to 10 percent of circulation"], answer: 1,
+      why: "High-efficiency drift eliminators bring drift down to roughly 0.001 to 0.005 percent. Older towers without effective eliminators could lose 0.1 percent or more." },
+    { q: "Which statement best captures the trade-off in setting blowdown rate?",
+      options: ["More blowdown always lowers total cost of operation", "Less blowdown saves water and chemical inventory but raises scaling risk", "Blowdown rate has no effect on inhibitor consumption", "Blowdown is set solely by the ambient wet bulb temperature"], answer: 1,
+      why: "Reducing blowdown conserves water and treatment chemical, but concentrates hardness, alkalinity and silica, increasing scale and deposit risk." }
+  ]
+},
+{
+  id: 2,
+  title: "Cycles of Concentration",
+  category: "Fundamentals",
+  difficulty: 1,
+  blurb: "The single number that ties water conservation to scale risk.",
+  paragraphs: [
+    "Cycles of concentration (CoC, sometimes called cycles or concentration ratio) is the ratio of the concentration of a dissolved constituent in the recirculating water to its concentration in the makeup water. If makeup contains 100 ppm chloride and the tower water contains 500 ppm chloride, the system is running at five cycles. Equivalently, cycles can be computed from the water balance as CoC = M / (B + D), which shows that cycles rise as blowdown falls.",
+    "The tracer chosen to measure cycles must be conservative, meaning it neither precipitates, volatilizes, degrades nor is added by the treatment program. Chloride and magnesium are common choices. Conductivity is the most convenient field measurement and is what most controllers use, but it is only approximate because conductivity responds to all ions including those contributed by the treatment chemicals and by acid feed. Calcium is a poor tracer in a scaling system because it disappears into deposits, which makes the calculated cycles look artificially low and can mask an active scaling event.",
+    "Raising cycles delivers real savings. Going from 3 to 6 cycles roughly halves blowdown and cuts makeup by a meaningful percentage, while also reducing the volume of chemically treated water sent to discharge. The savings flatten out quickly, however: the step from 2 to 4 cycles is worth far more water than the step from 8 to 10. Meanwhile, the risk climbs steadily, because calcium, alkalinity, silica, sulfate and suspended solids all concentrate in lockstep.",
+    "The practical limit on cycles is set by whichever constituent reaches its solubility or corrosivity limit first, often called the limiting parameter. For a hard, alkaline makeup water it is usually calcium carbonate. For a high-silica well water it is silica or magnesium silicate. For a softened or reclaimed makeup it may be chloride-driven pitting of stainless steel, or the sheer conductivity of the water. Good practice is to identify the limiting parameter explicitly, then either cycle up to just below its limit or change the chemistry, for example by feeding acid or by pretreating makeup, to move the limit higher."
+  ],
+  keyTerms: ["Cycles of concentration", "Conservative tracer", "Limiting parameter", "Conductivity control"],
+  questions: [
+    { q: "Makeup water contains 80 ppm chloride and the recirculating water contains 400 ppm chloride. The system is operating at:",
+      options: ["3 cycles", "5 cycles", "8 cycles", "0.2 cycles"], answer: 1,
+      why: "Cycles equals tower concentration divided by makeup concentration: 400 / 80 = 5." },
+    { q: "Why is calcium a poor choice of tracer for calculating cycles?",
+      options: ["Calcium cannot be measured accurately in the field", "Calcium may precipitate as scale, so it under-reports true cycles", "Calcium is added by most inhibitor programs", "Calcium evaporates with the water vapor"], answer: 1,
+      why: "A conservative tracer must stay in solution. Calcium lost to scale makes calculated cycles read low and can hide a scaling problem." },
+    { q: "Ignoring drift, cycles of concentration can be expressed from the water balance as:",
+      options: ["CoC = B / M", "CoC = M / B", "CoC = E / M", "CoC = B / E"], answer: 1,
+      why: "With drift neglected, M = E + B and CoC = M / B. Cycles rise as blowdown falls." },
+    { q: "Which statement about increasing cycles is most accurate?",
+      options: ["Water savings per added cycle grow steadily as cycles increase", "Water savings per added cycle diminish rapidly as cycles increase", "Cycles have no effect on blowdown volume", "Higher cycles reduce dissolved solids in the tower"], answer: 1,
+      why: "The incremental water saved falls off sharply. Moving 2 to 4 cycles saves far more than 8 to 10, while scaling risk keeps climbing." },
+    { q: "The 'limiting parameter' for a cooling system is best defined as:",
+      options: ["The maximum tower basin temperature", "The constituent that first reaches a solubility or corrosivity limit as cycles rise", "The lowest allowable pH for the biocide program", "The design approach of the cooling tower"], answer: 1,
+      why: "Whichever species hits its limit first, commonly calcium carbonate, silica, or chloride, caps achievable cycles." }
+  ]
+},
+{
+  id: 3,
+  title: "Calcium Carbonate Scale and the LSI",
+  category: "Scale Control",
+  difficulty: 2,
+  blurb: "Inverse solubility, saturation pH, and why the hot skin temperature is what matters.",
+  paragraphs: [
+    "Calcium carbonate is the most common scale in cooling water because the two ingredients, calcium hardness and alkalinity, are present in nearly every natural makeup water and both concentrate with cycles. Unlike most salts, calcium carbonate exhibits inverse solubility: it becomes less soluble as temperature rises. That is precisely the wrong behavior for a cooling system, because the hottest surfaces are the heat exchanger tube walls that most need to stay clean. A thin calcium carbonate deposit is an excellent insulator, and even a 1/32 inch layer can impose a significant heat-transfer penalty and force higher cooling water rates.",
+    "The Langelier Saturation Index (LSI) is the classic screening tool. It is defined as LSI = pH - pHs, where pHs is the pH at which the water would be exactly saturated with calcium carbonate at that temperature, calcium hardness, total alkalinity and total dissolved solids. A positive LSI means the water is supersaturated and thermodynamically wants to deposit calcium carbonate. A negative LSI means the water is undersaturated and will tend to dissolve existing carbonate deposits, including the protective carbonate films that help passivate mild steel.",
+    "The index must be evaluated at the right temperature. Calculating LSI at bulk basin temperature badly understates risk, because scale forms where the water is hottest, at the exchanger tube skin. Common practice is to evaluate LSI at the hot outlet or at an estimated skin temperature, sometimes 10 to 20 degrees F above the bulk return temperature. Similarly, pH must be the operating pH of the recirculating water, not the makeup pH, and it drifts upward as carbon dioxide is stripped out by the air flowing through the tower.",
+    "LSI is a direction indicator, not a rate or a quantity. It tells you whether the water wants to scale, not how fast or how much, and it takes no account of the inhibitor program. Modern treatment deliberately operates at positive LSI, often in the +1.5 to +2.5 range or higher, and relies on threshold inhibitors and dispersants to keep the supersaturated calcium carbonate from depositing. Running a slightly negative LSI to guarantee no scale is a false economy because it converts a scaling problem into a corrosion problem."
+  ],
+  keyTerms: ["Inverse solubility", "LSI", "Saturation pH", "Skin temperature", "Supersaturation"],
+  questions: [
+    { q: "Calcium carbonate is described as having 'inverse solubility', meaning:",
+      options: ["It dissolves faster at low pH", "It becomes less soluble as temperature increases", "It becomes less soluble as pH decreases", "It precipitates only in the tower basin"], answer: 1,
+      why: "Solubility falls as temperature rises, so calcium carbonate deposits preferentially on the hottest heat-transfer surfaces." },
+    { q: "The Langelier Saturation Index is calculated as:",
+      options: ["LSI = pHs - pH", "LSI = pH - pHs", "LSI = 2pHs - pH", "LSI = pH x pHs"], answer: 1,
+      why: "LSI = pH - pHs. Positive values indicate supersaturation with calcium carbonate." },
+    { q: "Evaluating LSI at bulk basin temperature rather than exchanger skin temperature typically:",
+      options: ["Overstates the scaling risk", "Understates the scaling risk", "Has no effect on the calculated index", "Converts LSI into the Ryznar index"], answer: 1,
+      why: "Scale forms at the hottest surface. Because calcium carbonate has inverse solubility, using the cooler bulk temperature makes the water look safer than it is." },
+    { q: "A significant limitation of the LSI is that it:",
+      options: ["Cannot be calculated without a laboratory", "Indicates direction only, not the rate or amount of scale, and ignores inhibitors", "Applies only to calcium sulfate", "Requires the water to be at exactly 77 degrees F"], answer: 1,
+      why: "LSI is a thermodynamic driving-force indicator. It says nothing about kinetics, deposit quantity, or the effect of threshold inhibitors." },
+    { q: "Deliberately holding LSI slightly negative to eliminate scale risk is generally poor practice because:",
+      options: ["It causes excessive foaming", "The water becomes aggressive and attacks protective films, increasing corrosion", "It makes biocide feed impossible", "Negative LSI cannot be maintained in an open tower"], answer: 1,
+      why: "Undersaturated water dissolves protective carbonate films and increases mild steel corrosion. Modern programs run positive LSI with inhibitors instead." }
+  ]
+},
+{
+  id: 4,
+  title: "Beyond LSI - RSI, PSI and Index Limits",
+  category: "Scale Control",
+  difficulty: 3,
+  blurb: "Ryznar, Puckorius and Stiff-Davis: choosing the right yardstick for the water.",
+  paragraphs: [
+    "The Ryznar Stability Index (RSI) was developed to give an empirical feel for how much scale or corrosion to expect, rather than just a direction. It is defined as RSI = 2pHs - pH and uses the same saturation pH as the Langelier index, but the scale runs in the opposite sense: values below about 6 indicate a tendency to scale, values around 6 to 7 indicate approximate balance, and values above about 7 to 8 indicate increasingly aggressive, corrosive water. Because RSI was correlated against field observations, many operators find it more intuitive for judging severity.",
+    "The Puckorius Scaling Index (PSI), sometimes called the practical scaling index, addresses a real weakness in both LSI and RSI. Those indices use measured pH, but the buffering capacity of the water determines what pH the water will actually reach at a heated surface. PSI substitutes an equilibrium pH calculated from total alkalinity, giving PSI = 2pHs - pHeq. For waters that are high in alkalinity relative to their measured pH, or the reverse, PSI often tracks field scaling behavior better than LSI does.",
+    "The Stiff-Davis index extends saturation calculations to brackish and high-TDS waters where the simple LSI ionic-strength corrections break down. It is the appropriate choice for systems on reclaimed municipal effluent, brackish well water or seawater-influenced makeup, all of which appear in coastal refinery service. A related index, the Larson-Skold index, compares chloride plus sulfate against bicarbonate plus carbonate to gauge the aggressiveness of a water toward mild steel, which is useful when high-chloride makeup or acid feed has shifted the anion balance.",
+    "No index predicts calcium phosphate, calcium sulfate, silica or magnesium silicate scale, and none of them account for the inhibitor program, dispersants, flow velocity or the presence of suspended solids that provide nucleation sites. In practice they serve as screening tools and as alarm setpoints in a control scheme. Sound programs pair index calculations with direct evidence: heat-exchanger inspections, deposit sampling and analysis, corrosion coupons, and monitoring of the calcium and alkalinity balance to confirm that what is being cycled in is still in solution."
+  ],
+  keyTerms: ["Ryznar Stability Index", "Puckorius Scaling Index", "Equilibrium pH", "Stiff-Davis", "Larson-Skold"],
+  questions: [
+    { q: "The Ryznar Stability Index is defined as:",
+      options: ["RSI = pH - pHs", "RSI = 2pHs - pH", "RSI = pHs - 2pH", "RSI = pH + pHs"], answer: 1,
+      why: "RSI = 2pHs - pH. Values below about 6 suggest scaling, above about 7 suggest corrosive water." },
+    { q: "An RSI value of 8.5 suggests the water is:",
+      options: ["Strongly scale-forming", "Aggressive and corrosive", "Perfectly balanced", "Supersaturated with silica"], answer: 1,
+      why: "On the Ryznar scale, high values indicate aggressive water. The index runs opposite in sense to the LSI." },
+    { q: "The key difference between the Puckorius index and the Langelier index is that PSI uses:",
+      options: ["Skin temperature instead of bulk temperature", "An equilibrium pH derived from total alkalinity instead of measured pH", "Chloride instead of calcium", "Conductivity instead of TDS"], answer: 1,
+      why: "PSI substitutes an alkalinity-based equilibrium pH, which better reflects the pH the water will reach at a heated surface." },
+    { q: "For a coastal refinery cooling system on brackish, high-TDS makeup, the most appropriate saturation index is:",
+      options: ["Langelier Saturation Index", "Stiff-Davis index", "Ryznar Stability Index", "Puckorius Scaling Index"], answer: 1,
+      why: "Stiff-Davis extends saturation calculations to high ionic strength waters where the LSI's simplified corrections are invalid." },
+    { q: "Which scale type is NOT predicted by the LSI, RSI or PSI?",
+      options: ["Calcium carbonate", "Calcium phosphate", "None - all three indices cover every scale", "Carbonate scale at elevated temperature"], answer: 1,
+      why: "These indices address calcium carbonate saturation only. Calcium phosphate, sulfate, silica and magnesium silicate require separate solubility evaluation." }
+  ]
+},
+{
+  id: 5,
+  title: "Phosphonate Scale Inhibitors",
+  category: "Scale Control",
+  difficulty: 2,
+  blurb: "HEDP, AMP and PBTC - threshold inhibition at a few parts per million.",
+  paragraphs: [
+    "Phosphonates are organophosphorus compounds containing carbon-phosphorus bonds, which makes them far more hydrolytically and thermally stable than the inorganic polyphosphates they replaced. The three workhorses in cooling water are HEDP (1-hydroxyethylidene-1,1-diphosphonic acid), AMP or ATMP (amino trimethylene phosphonic acid), and PBTC (2-phosphonobutane-1,2,4-tricarboxylic acid). All three inhibit calcium carbonate and calcium sulfate deposition, and all three contribute to mild steel corrosion inhibition by helping form a protective film in combination with calcium and zinc.",
+    "Their signature property is threshold inhibition: a few parts per million of phosphonate will hold many hundreds of ppm of supersaturated calcium carbonate in solution, far below the stoichiometric ratio that a true chelant such as EDTA would require. The mechanism is adsorption onto the surfaces of sub-microscopic crystal nuclei, which blocks growth sites and distorts the crystal habit. Crystals that do form are misshapen and poorly adherent, so they stay suspended and are carried out with blowdown rather than bonding to hot metal.",
+    "Each molecule has its own weaknesses. HEDP is inexpensive and an excellent carbonate inhibitor, but it is degraded by free halogen and forms a sparingly soluble calcium-HEDP salt when calcium is high and phosphonate is overfed, producing a stubborn deposit that looks like a treatment failure but is actually caused by too much treatment. AMP is a good general inhibitor and iron stabilizer but is the most chlorine-sensitive of the three, degrading to orthophosphate that can then create a calcium phosphate scaling risk. PBTC is the most halogen-stable and most tolerant of high calcium, which is why it is preferred in heavily chlorinated refinery systems, though it costs more.",
+    "Because phosphonates degrade to orthophosphate under halogen attack, the two chemistries are linked. A system carrying high free chlorine residual, or shocked with excessive halogen, can convert its scale inhibitor into a scale former, and analysts see phosphonate residual falling while orthophosphate rises. Standard practice is to trend both, to select PBTC where oxidant demand is high, and to feed phosphonate continuously at a controlled residual rather than in large slugs."
+  ],
+  keyTerms: ["Threshold inhibition", "Crystal distortion", "HEDP", "PBTC", "AMP/ATMP", "Calcium phosphonate"],
+  questions: [
+    { q: "'Threshold inhibition' means that the inhibitor:",
+      options: ["Works only above a threshold temperature", "Prevents scale at doses far below stoichiometric with the scaling ion", "Must exceed the calcium concentration to be effective", "Only works after a threshold pH of 9 is reached"], answer: 1,
+      why: "A few ppm of phosphonate controls hundreds of ppm of supersaturated hardness by adsorbing onto crystal nuclei, unlike a chelant that must be dosed stoichiometrically." },
+    { q: "Which phosphonate is generally the most stable in heavily chlorinated systems?",
+      options: ["AMP (ATMP)", "PBTC", "HEDP", "All are equally chlorine-stable"], answer: 1,
+      why: "PBTC offers the best halogen stability and high-calcium tolerance, which is why it is favored in refinery systems with heavy oxidant demand." },
+    { q: "Overfeeding HEDP in a high-calcium water can cause:",
+      options: ["Excessive foaming in the tower basin", "Precipitation of a sparingly soluble calcium-phosphonate salt", "A sharp rise in system pH", "Complete loss of yellow metal protection"], answer: 1,
+      why: "Calcium-HEDP has limited solubility. Overfeed at high calcium produces a deposit that mimics a treatment failure but is caused by excess inhibitor." },
+    { q: "When phosphonates are degraded by free halogen, the degradation product of concern is:",
+      options: ["Orthophosphate, which can form calcium phosphate scale", "Ammonia, which attacks copper alloys", "Silica, which forms glassy deposits", "Sulfate, which forms gypsum"], answer: 0,
+      why: "Halogen attack on the carbon-phosphorus structure releases orthophosphate, converting a scale inhibitor into a potential calcium phosphate scale former." },
+    { q: "Compared with inorganic polyphosphates, phosphonates offer:",
+      options: ["Lower cost per pound", "Greater resistance to hydrolysis (reversion) because of the C-P bond", "Complete immunity to chlorine", "A requirement for stoichiometric dosing"], answer: 1,
+      why: "The carbon-phosphorus bond resists the hydrolytic reversion to orthophosphate that plagues polyphosphates, though halogen attack can still degrade phosphonates." }
+  ]
+},
+{
+  id: 6,
+  title: "Polymeric Dispersants",
+  category: "Scale Control",
+  difficulty: 2,
+  blurb: "Acrylates, maleics and terpolymers that keep particles suspended and stabilize phosphate.",
+  paragraphs: [
+    "Where phosphonates work on crystal nucleation, polymers work on the particles that already exist. Low molecular weight polyacrylates, polymethacrylates, polymaleics and copolymers in the roughly 2,000 to 20,000 dalton range adsorb onto suspended particles and impart a strong negative charge. The resulting electrostatic repulsion keeps silt, clay, corrosion products, biological debris and precipitated hardness dispersed as fine particles that stay entrained in the flowing water rather than settling out in low-velocity areas or binding into a deposit on hot metal.",
+    "Molecular weight is the key design variable. Very low molecular weight material behaves more like a threshold inhibitor and crystal modifier. Mid-range material is the best general dispersant. High molecular weight polymer starts to bridge particles together and can act as a flocculant, which is the opposite of the intended effect. This is why cooling water dispersants are specified within a narrow molecular weight window and why substituting a polymer from a clarification application into a cooling tower can make deposition worse.",
+    "The most demanding dispersancy job in alkaline cooling programs is stabilizing calcium phosphate. Alkaline phosphate programs deliberately carry orthophosphate to build a protective iron phosphate film on mild steel, but calcium phosphate has very low solubility at pH 8 and above and its solubility drops further as temperature rises. Sulfonated copolymers and terpolymers, typically acrylic acid combined with AMPS (2-acrylamido-2-methylpropane sulfonic acid) and a nonionic monomer, were developed specifically to hold calcium phosphate in solution and to tolerate the iron and the hardness upsets that would cause a plain polyacrylate to lose its footing.",
+    "Polymers also stabilize soluble iron. Iron entering from corrosion, from makeup water or from a process leak will otherwise precipitate as ferric hydroxide, which both fouls surfaces and consumes other inhibitors by adsorption. A polymer that tolerates iron protects the rest of the program. Because polymer residual is difficult to measure directly in the field, many suppliers incorporate an inert fluorescent tracer at a fixed ratio so that a fluorometer reading gives an immediate, accurate measure of how much product is actually in the system, separating feed problems from consumption problems."
+  ],
+  keyTerms: ["Polyacrylate", "Molecular weight", "AMPS terpolymer", "Calcium phosphate stabilization", "Fluorescent tracer"],
+  questions: [
+    { q: "The primary mechanism by which a polymeric dispersant keeps particles suspended is:",
+      options: ["Dissolving the particles into solution", "Adsorbing onto particles and imparting a repulsive negative charge", "Raising the water viscosity", "Chelating calcium stoichiometrically"], answer: 1,
+      why: "Adsorbed polymer confers negative surface charge, so particles repel one another and remain dispersed instead of agglomerating and settling." },
+    { q: "Using a very high molecular weight polymer in a cooling tower risks:",
+      options: ["Excessive foaming only", "Bridging particles together and acting as a flocculant", "Immediate hydrolysis to orthophosphate", "Raising the LSI"], answer: 1,
+      why: "High molecular weight polymers bridge particles and flocculate them, which is desirable in clarification but counterproductive as a cooling water dispersant." },
+    { q: "Sulfonated (AMPS-containing) terpolymers were developed primarily to:",
+      options: ["Replace chlorine as a biocide", "Stabilize calcium phosphate and tolerate iron and hardness upsets", "Lower the conductivity of the recirculating water", "Increase drift eliminator efficiency"], answer: 1,
+      why: "AMPS terpolymers hold calcium phosphate in solution in alkaline phosphate programs and resist deactivation by iron and hardness excursions." },
+    { q: "Calcium phosphate solubility in an alkaline cooling water:",
+      options: ["Increases with both pH and temperature", "Decreases as pH and temperature rise", "Is independent of temperature", "Is highest at pH 9"], answer: 1,
+      why: "Calcium phosphate becomes less soluble as pH and temperature increase, which is exactly why alkaline phosphate programs need strong dispersants." },
+    { q: "An inert fluorescent tracer is added to many treatment products so that operators can:",
+      options: ["Detect Legionella colonies visually", "Directly measure product concentration and distinguish feed problems from consumption", "Increase the polymer's dispersancy", "Lower the required biocide dose"], answer: 1,
+      why: "Fluorescent tracing gives a fast, accurate reading of how much product is in the system, separating a pump or feed failure from genuine chemical consumption." }
+  ]
+},
+{
+  id: 7,
+  title: "Alkaline Phosphate Programs",
+  category: "Corrosion Control",
+  difficulty: 2,
+  blurb: "Building an iron phosphate film while walking the calcium phosphate tightrope.",
+  paragraphs: [
+    "When chromate was phased out of cooling water service in the United States following EPA restrictions in the late 1980s and early 1990s, alkaline phosphate programs became the dominant replacement for mild steel protection in industrial systems. Instead of acidifying the water and relying on a toxic anodic inhibitor, these programs deliberately run the water alkaline, typically pH 7.8 to 9.0, and use orthophosphate together with calcium to build a protective film on the steel surface.",
+    "The protective layer is a mixed film. Orthophosphate reacts at anodic sites to lay down iron phosphate, while the alkaline pH and the calcium in the water support a calcium carbonate and calcium phosphate component. The result is a thin, tenacious, largely inorganic barrier. Running alkaline provides a second benefit that is easy to overlook: it dramatically reduces the general corrosion rate of mild steel by itself, because carbon steel corrosion falls sharply above about pH 8, so the inhibitor has less work to do and less acid is consumed.",
+    "The catch is that the same conditions that build the film also drive calcium phosphate scale. Phosphate is typically carried at 5 to 15 ppm as PO4, and at pH 8.5 with several hundred ppm of calcium the water is well past calcium phosphate saturation at heat transfer surfaces. The program only works because of aggressive dispersant chemistry. The consequence is that alkaline phosphate programs have a relatively narrow operating window: lose polymer feed, spike the calcium, let the pH climb, or overheat an exchanger, and calcium phosphate deposits rapidly on the very surfaces you are protecting.",
+    "Operationally this means tight control. Phosphate residual, both total and ortho, is trended so that a rising ortho fraction flags phosphonate degradation. pH is controlled with acid feed, and calcium plus phosphate plus temperature are checked against a stress index that suppliers publish for their programs. Environmental pressure is now pushing the other way as well: phosphorus discharge limits at many refineries have tightened due to nutrient regulations, which has driven adoption of low-phosphorus and phosphorus-free alternatives."
+  ],
+  keyTerms: ["Chromate phase-out", "Orthophosphate", "Iron phosphate film", "Stress index", "Phosphorus discharge limits"],
+  questions: [
+    { q: "Alkaline phosphate programs became widespread primarily because:",
+      options: ["They are cheaper than any other program", "Environmental regulation forced the phase-out of chromate inhibitors", "They eliminate the need for biocides", "They allow unlimited cycles of concentration"], answer: 1,
+      why: "Chromate was highly effective but toxic. Regulatory phase-out in the late 1980s and early 1990s drove the shift to alkaline phosphate chemistry." },
+    { q: "In an alkaline phosphate program, orthophosphate protects mild steel by:",
+      options: ["Scavenging dissolved oxygen", "Forming a protective iron phosphate film at anodic sites", "Lowering the water's conductivity", "Chelating iron and carrying it out in blowdown"], answer: 1,
+      why: "Orthophosphate reacts at anodes to form an iron phosphate barrier film, supported by calcium carbonate and calcium phosphate components." },
+    { q: "The principal risk that must be managed in an alkaline phosphate program is:",
+      options: ["Calcium phosphate deposition on heat transfer surfaces", "Excessive dissolution of copper alloys", "Loss of drift eliminator efficiency", "Silica volatilization"], answer: 0,
+      why: "The alkaline, high-calcium, phosphate-bearing water is supersaturated with calcium phosphate at hot surfaces, so the program depends on effective dispersants." },
+    { q: "Operating cooling water above about pH 8 helps because:",
+      options: ["Mild steel general corrosion rates drop sharply in that range", "Biological growth is eliminated", "Calcium carbonate becomes more soluble", "Chlorine becomes more effective"], answer: 0,
+      why: "Carbon steel corrosion falls markedly as pH rises above roughly 8, so alkaline operation reduces the burden on the inhibitor. Note that chlorine actually becomes less effective at high pH." },
+    { q: "A rising orthophosphate residual alongside a falling phosphonate residual most likely indicates:",
+      options: ["Successful film formation", "Halogen degradation of the phosphonate", "A calcium hardness upset", "A failed dispersant pump only"], answer: 1,
+      why: "Oxidant attack converts phosphonate to orthophosphate. Trending both values reveals the conversion before calcium phosphate scale appears." }
+  ]
+},
+{
+  id: 8,
+  title: "Mild Steel Corrosion Mechanisms",
+  category: "Corrosion Control",
+  difficulty: 2,
+  blurb: "The electrochemical cell, oxygen as the driver, and the anodic/cathodic inhibitor split.",
+  paragraphs: [
+    "Corrosion of carbon steel in cooling water is an electrochemical process requiring four elements: an anode where iron dissolves, a cathode where a reduction reaction consumes the released electrons, a metallic path between them, and an electrolyte. At the anode, iron oxidizes to ferrous ion, releasing two electrons. In the near-neutral, aerated water typical of a cooling tower, the dominant cathodic reaction is oxygen reduction, in which dissolved oxygen plus water plus electrons yields hydroxide ion. Because a cooling tower is essentially an air scrubber, the recirculating water is continuously saturated with oxygen, so the cathodic reaction is never starved and corrosion is oxygen-driven.",
+    "Inhibitors are classified by which half of that cell they interfere with. Anodic inhibitors, historically chromate and nitrite and today orthophosphate and molybdate, passivate anodic sites by forming a film. They are highly effective when fed adequately but are described as dangerous inhibitors, because underfeeding leaves small unprotected anodes surrounded by large protected cathodes, concentrating the attack into deep pits rather than spreading it. Cathodic inhibitors, notably zinc and to a degree polyphosphate and calcium carbonate films, precipitate at cathodic sites where local pH is high. They are less efficient overall but fail gracefully, giving general thinning rather than perforation.",
+    "Several localized mechanisms are more damaging than uniform loss. Under-deposit corrosion develops beneath silt, biofilm or scale, where oxygen is depleted and chloride concentrates, creating a differential aeration cell and an acidic, aggressive local environment. Galvanic corrosion attacks the less noble metal wherever dissimilar metals are coupled, a common issue where carbon steel piping meets admiralty brass or stainless tubing. Erosion-corrosion strips protective films where velocity is excessive or flow is turbulent at inlets and elbows, while stagnant low-velocity zones invite deposition and the under-deposit attack that follows.",
+    "Flow velocity therefore has both a floor and a ceiling. Practice in industrial cooling generally targets roughly 3 to 8 feet per second in exchanger tubes: fast enough to keep solids swept along, deliver inhibitor to the surface and prevent deposits, but slow enough to avoid stripping films or eroding admiralty and copper-nickel tubing, which are particularly velocity-sensitive. Idle or intermittently used exchangers are a classic failure point, because the water sits stagnant, oxygen and inhibitor are consumed, solids settle and microbes flourish."
+  ],
+  keyTerms: ["Anode and cathode", "Oxygen reduction", "Anodic inhibitor", "Cathodic inhibitor", "Under-deposit corrosion", "Velocity limits"],
+  questions: [
+    { q: "In aerated near-neutral cooling water, the dominant cathodic reaction is:",
+      options: ["Hydrogen evolution from acid", "Oxygen reduction to hydroxide", "Sulfate reduction to sulfide", "Precipitation of calcium carbonate"], answer: 1,
+      why: "The recirculating water is oxygen-saturated because the tower scrubs air, so oxygen reduction dominates and drives the corrosion cell." },
+    { q: "Anodic inhibitors such as chromate and nitrite are sometimes called 'dangerous inhibitors' because:",
+      options: ["They are flammable", "Underfeeding concentrates attack into deep pits at remaining unprotected anodes", "They raise pH uncontrollably", "They react violently with chlorine"], answer: 1,
+      why: "Partial anodic coverage creates a small anode / large cathode area ratio, which intensifies local current density and produces pitting rather than uniform loss." },
+    { q: "Zinc functions in a cooling water program principally as a:",
+      options: ["Anodic inhibitor", "Cathodic inhibitor that precipitates at high-pH cathodic sites", "Biocide", "Dispersant"], answer: 1,
+      why: "Zinc precipitates as hydroxide at cathodic sites where local pH is elevated, forming a film that stifles the cathodic reaction." },
+    { q: "Under-deposit corrosion is driven mainly by:",
+      options: ["Excessive flow velocity", "Oxygen depletion and chloride concentration beneath the deposit forming a differential aeration cell", "High pH beneath the deposit", "Loss of dissolved carbon dioxide"], answer: 1,
+      why: "The area under a deposit becomes oxygen-starved and anodic, while chloride migrates in and hydrolysis acidifies the crevice, accelerating attack." },
+    { q: "A typical target velocity range in cooling water exchanger tubes is:",
+      options: ["0.1 to 0.5 ft/s", "3 to 8 ft/s", "15 to 25 ft/s", "Velocity is irrelevant if inhibitor is fed"], answer: 1,
+      why: "Roughly 3 to 8 ft/s keeps solids moving and delivers inhibitor without stripping films or eroding velocity-sensitive copper alloys." }
+  ]
+},
+{
+  id: 9,
+  title: "Corrosion Monitoring in Cooling Systems",
+  category: "Monitoring",
+  difficulty: 2,
+  blurb: "Coupons, LPR, ER probes and why mils per year alone can lie to you.",
+  paragraphs: [
+    "Corrosion coupons are the reference method. Pre-weighed metal specimens of the alloys in service, commonly C1010 mild steel and admiralty brass or copper, are mounted in a bypass rack sized to give representative velocity, exposed for a defined period, then cleaned and reweighed. Mass loss converts to a general corrosion rate in mils per year (mpy). The method is simple, unambiguous and directly measures what actually happened, but it is retrospective: a 90-day coupon tells you about a quarter that has already passed, and it averages over any upset that occurred within it.",
+    "Widely cited industry guidance for open recirculating cooling water puts excellent mild steel performance below about 1 mpy, good performance around 1 to 3 mpy, and unacceptable performance above roughly 5 mpy, with copper alloys expected to run well below 0.2 to 0.5 mpy. These thresholds are guidance rather than code, and the qualitative examination is at least as important as the number. A coupon showing 2 mpy uniform loss is healthy; a coupon showing 2 mpy average with deep isolated pits is a warning of impending tube failure, because the average conceals a very high local penetration rate.",
+    "Electrochemical techniques supply the real-time picture that coupons cannot. Linear polarization resistance (LPR) applies a small potential perturbation, typically within about 10 to 20 mV of the free corrosion potential, and infers instantaneous general corrosion rate from the measured current. It responds within minutes to a chemistry upset, a biocide addition or a feed pump failure. LPR requires a conductive electrolyte, which cooling water provides, and it does not reliably see localized attack, though the electrochemical noise or the imbalance signal on a three-electrode probe gives a useful pitting indication. Electrical resistance (ER) probes measure the increasing resistance of a thinning metal element, work in low-conductivity or even non-aqueous environments, and integrate metal loss over time.",
+    "The strongest programs combine all three plus physical evidence. Coupons anchor the absolute number, LPR catches transients and confirms that a corrective action worked, ER probes bridge the two, and periodic heat exchanger inspection with deposit analysis confirms what is actually accumulating on the tubes. Placement matters: monitoring devices must sit in flowing water at representative velocity and temperature, because a corrosion rack on a stagnant low-point line will report a system that does not exist."
+  ],
+  keyTerms: ["Corrosion coupon", "mils per year", "Linear polarization resistance", "ER probe", "Pitting index"],
+  questions: [
+    { q: "For mild steel in an open recirculating cooling system, a commonly cited target for good performance is:",
+      options: ["Below about 3 mpy", "Below about 25 mpy", "Below about 50 mpy", "Any rate is acceptable if pH is controlled"], answer: 0,
+      why: "Common guidance treats under 1 mpy as excellent and 1 to 3 mpy as good for mild steel, with above roughly 5 mpy considered unacceptable." },
+    { q: "The principal limitation of corrosion coupons is that they:",
+      options: ["Cannot be used for copper alloys", "Are retrospective and average over the whole exposure period", "Require a potentiostat to read", "Only work below pH 7"], answer: 1,
+      why: "A coupon reports what already happened over its exposure, averaging out upsets. It cannot warn you in real time." },
+    { q: "Linear polarization resistance monitoring provides:",
+      options: ["A retrospective mass-loss measurement", "A near real-time general corrosion rate that responds within minutes", "A direct measurement of biofilm thickness", "A measure of cycles of concentration"], answer: 1,
+      why: "LPR infers instantaneous corrosion rate from a small applied polarization, so it responds quickly to upsets and confirms corrective actions." },
+    { q: "A coupon shows an average loss of 2 mpy but has several deep pits. The correct interpretation is:",
+      options: ["Performance is acceptable because the average is under 3 mpy", "Performance is a concern because local penetration far exceeds the average", "The coupon was installed backwards", "The pits prove the biocide is overfed"], answer: 1,
+      why: "Averaged mass loss conceals localized attack. Pitting penetration, not the average, determines when a tube perforates." },
+    { q: "Why does coupon rack placement matter so much?",
+      options: ["Coupons corrode faster in the dark", "Non-representative velocity or temperature produces data about a system that does not exist", "Racks must always be above the tower deck", "Placement affects only the copper coupons"], answer: 1,
+      why: "Monitoring must see representative velocity and temperature. A rack on a stagnant line will badly misrepresent real exchanger conditions." }
+  ]
+},
+{
+  id: 10,
+  title: "Yellow Metal Corrosion and Azole Inhibitors",
+  category: "Corrosion Control",
+  difficulty: 2,
+  blurb: "Tolyltriazole, benzotriazole and the copper plating cascade that eats carbon steel.",
+  paragraphs: [
+    "Refinery cooling systems are full of copper alloys: admiralty brass, aluminum brass and copper-nickel exchanger tubing chosen for excellent heat transfer and seawater resistance. Copper is comparatively noble and resists general corrosion well, but it has two specific vulnerabilities in cooling water. It is attacked by ammonia and by oxidizing halogens, and brasses are subject to dezincification, in which zinc is selectively leached from the alloy leaving a porous, mechanically weak copper residue that may retain its original shape right up until it fails.",
+    "The consequence of copper corrosion extends far beyond the copper itself. Dissolved cupric ion released into the water plates out onto any mild steel surface it reaches, because copper is cathodic to iron. Each deposited copper particle creates a galvanic microcell with a very unfavorable area ratio, driving intense localized pitting of the carbon steel. A small amount of copper corrosion can therefore produce a large amount of steel damage, which is why copper corrosion rates are held to far tighter limits, commonly below 0.2 mpy, than steel rates.",
+    "Azoles are the standard protection. Tolyltriazole (TTA), benzotriazole (BZT) and halogen-resistant azoles (HRA, typically a chlorine-tolerant butyl-substituted derivative) chemisorb onto the copper surface and form a thin, tightly bound polymeric copper-azole complex that blocks both oxidation of the copper and dissolution of zinc from brass. Effective residuals are low, often 1 to 3 ppm, but the film must be maintained continuously and it takes time to build on a freshly cleaned surface.",
+    "The operational conflict is with halogen. Free chlorine and bromine consume azole and degrade the protective film, so a system running a strong oxidant residual can starve its copper of protection at exactly the moment it needs it most. Practical countermeasures include using a halogen-resistant azole, feeding azole continuously rather than in slugs, avoiding feeding azole and oxidant at the same injection point, and monitoring free versus total azole residual. Chlorine also attacks copper directly and its overuse is a documented cause of admiralty tube failure."
+  ],
+  keyTerms: ["Admiralty brass", "Dezincification", "Copper plating", "Tolyltriazole", "Halogen-resistant azole"],
+  questions: [
+    { q: "Dezincification of brass is best described as:",
+      options: ["Uniform thinning of the tube wall", "Selective leaching of zinc leaving weak, porous copper", "Deposition of zinc inhibitor onto the tube", "Cracking caused by excess velocity"], answer: 1,
+      why: "Zinc is preferentially removed from the alloy, leaving a spongy copper structure that keeps its shape but has lost mechanical strength." },
+    { q: "Why is a small amount of copper corrosion disproportionately damaging?",
+      options: ["Copper ions raise the pH sharply", "Dissolved copper plates onto mild steel and drives severe galvanic pitting", "Copper consumes all the dispersant", "Copper ions destroy drift eliminators"], answer: 1,
+      why: "Copper is cathodic to iron. Plated copper deposits create microcells with a small anode / large cathode ratio, producing deep pits in carbon steel." },
+    { q: "Azole inhibitors protect copper alloys by:",
+      options: ["Raising the local pH at the copper surface", "Chemisorbing to form a tightly bound copper-azole film", "Reducing dissolved oxygen at the surface", "Precipitating zinc onto the tube"], answer: 1,
+      why: "TTA, BZT and HRA form a thin chemisorbed copper-azole complex that blocks copper oxidation and zinc dissolution." },
+    { q: "The main operational conflict for azole programs in refinery cooling systems is:",
+      options: ["Incompatibility with polymeric dispersants", "Consumption and film degradation by free halogen biocides", "Loss of effectiveness above pH 7", "Reaction with corrosion coupons"], answer: 1,
+      why: "Free chlorine and bromine consume azole and degrade the film, which is why halogen-resistant azoles and separated feed points are used." },
+    { q: "Copper alloy corrosion rates in cooling water are typically held to:",
+      options: ["Below about 0.2 mpy", "Below about 3 mpy", "Below about 10 mpy", "The same limit as mild steel"], answer: 0,
+      why: "Because of the copper-plating cascade onto steel, copper limits are far tighter than steel limits, commonly under 0.2 mpy." }
+  ]
+},
+{
+  id: 11,
+  title: "Chlorine Chemistry in Cooling Water",
+  category: "Microbiological Control",
+  difficulty: 2,
+  blurb: "Hypochlorous acid, the pH problem, and free versus total residual.",
+  paragraphs: [
+    "Chlorine remains the backbone oxidizing biocide in refinery cooling service, fed as chlorine gas, sodium hypochlorite (bleach) or generated on site by electrolysis of brine. Whatever the source, the active species in water is hypochlorous acid (HOCl), which forms when chlorine hydrolyzes. Hypochlorous acid is a small, uncharged molecule that penetrates the cell wall readily and oxidizes enzymes and membrane structures, killing quickly and non-selectively. Gaseous chlorine and hypochlorous acid also depress pH slightly, while sodium hypochlorite raises it because commercial bleach is strongly alkaline.",
+    "The dominant limitation is pH sensitivity. Hypochlorous acid is a weak acid that dissociates into hypochlorite ion (OCl-) and hydrogen ion, with a pKa near 7.5 at ambient temperature. Hypochlorite ion is charged, penetrates cells poorly, and is roughly one to two orders of magnitude less biocidally effective than the undissociated acid. At pH 7 about three-quarters of the free chlorine exists as HOCl; by pH 8.5 only about 10 percent does. This is a direct conflict with alkaline treatment programs, which deliberately run pH 8 to 9 for corrosion control, and it means a chlorine dose that works well in one system may be nearly useless in another at higher pH.",
+    "Chlorine also reacts with much more than microorganisms. Ammonia forms chloramines, which register as combined chlorine and are far weaker biocides. Hydrogen sulfide, hydrocarbons, reduced iron and manganese, organic matter and even the treatment polymers and phosphonates all exert demand. That distinction underlies the free versus total residual measurement: free residual is the HOCl and OCl- actually available to disinfect, total residual includes combined forms. In refinery service, where process leaks can suddenly introduce enormous oxidant demand, only free residual is a meaningful control parameter, and a system showing high total but zero free chlorine is not being disinfected.",
+    "Typical practice targets a free residual on the order of 0.2 to 1.0 ppm at the tower, applied either continuously at a low level or intermittently as a shock, with the contact time in the basin doing much of the work. Overfeeding carries real penalties: accelerated attack on copper alloys and on wooden tower structure, degradation of azoles and phosphonates, formation of chlorinated organic byproducts subject to discharge limits, and higher corrosion of carbon steel."
+  ],
+  keyTerms: ["Hypochlorous acid", "pKa 7.5", "Free vs total residual", "Chlorine demand", "Chloramines"],
+  questions: [
+    { q: "The most biocidally active free chlorine species in water is:",
+      options: ["Hypochlorite ion (OCl-)", "Hypochlorous acid (HOCl)", "Chloramine", "Chloride ion"], answer: 1,
+      why: "The uncharged HOCl molecule penetrates cell walls readily and is roughly 10 to 100 times more effective than the hypochlorite ion." },
+    { q: "As pH rises from 7.0 to 8.5, chlorine's biocidal effectiveness:",
+      options: ["Increases substantially", "Decreases substantially as HOCl dissociates to OCl-", "Stays essentially constant", "Depends only on temperature"], answer: 1,
+      why: "With a pKa near 7.5, the fraction present as active HOCl falls from about 75 percent at pH 7 to roughly 10 percent at pH 8.5." },
+    { q: "A cooling system shows 1.5 ppm total chlorine but 0.0 ppm free chlorine. This means:",
+      options: ["Disinfection is more than adequate", "The chlorine is bound in combined forms and is not effectively disinfecting", "The test kit is reading backwards", "Free chlorine is always lower than total, so this is normal and fine"], answer: 1,
+      why: "Combined chlorine, largely chloramines from ammonia, is a far weaker biocide. Without free residual, effective disinfection is not occurring." },
+    { q: "Which of these does NOT typically exert chlorine demand in a refinery cooling system?",
+      options: ["Ammonia from a process leak", "Hydrogen sulfide", "Dissolved sodium chloride already present in the water", "Hydrocarbon contamination"], answer: 2,
+      why: "Chloride is the reduced end product and exerts no demand. Ammonia, sulfide and hydrocarbons all consume oxidant rapidly." },
+    { q: "Chronic chlorine overfeed in a cooling tower is most likely to cause:",
+      options: ["Calcium carbonate scale", "Attack on copper alloys and tower wood, plus azole and phosphonate degradation", "An increase in cycles of concentration", "Reduced drift losses"], answer: 1,
+      why: "Excess halogen attacks admiralty tubing and wooden fill and structure, and destroys the azole and phosphonate inhibitors in the program." }
+  ]
+},
+{
+  id: 12,
+  title: "Bromine, Stabilized Halogens and Chlorine Dioxide",
+  category: "Microbiological Control",
+  difficulty: 3,
+  blurb: "Alternatives that work where plain chlorine runs out of room.",
+  paragraphs: [
+    "Bromine chemistry directly addresses chlorine's pH weakness. Hypobromous acid (HOBr) has a pKa near 8.7, roughly 1.2 units higher than hypochlorous acid, so at the pH 8.0 to 8.8 typical of alkaline cooling programs a much larger fraction of the halogen remains in the active undissociated form. Bromine is normally generated in situ by feeding sodium bromide along with chlorine or bleach: the chlorine oxidizes bromide to hypobromous acid. Bromine has the further advantage that bromamines, formed when it meets ammonia, retain substantial biocidal activity, unlike the largely inert chloramines. Bromine's drawbacks are cost, a shorter half-life in sunlight, and the same corrosivity concerns toward copper alloys.",
+    "Stabilized halogens tie the oxidant up in a reversible form to reduce its reactivity toward everything except microorganisms. Halogenated hydantoins, notably bromochlorodimethylhydantoin (BCDMH) and dichlorodimethylhydantoin, release halogen slowly and are convenient as solid feed. Chlorine or bromine stabilized with sulfamic acid produces a halogenated sulfamate that greatly reduces attack on azoles, phosphonates, wood and copper alloys and greatly extends halogen persistence in the system, at the price of a slower kill rate that demands longer contact time. Stabilized products are especially valuable in systems using reclaimed water with high organic and ammonia loading.",
+    "Chlorine dioxide is a fundamentally different oxidant. It is a dissolved gas that exists as a neutral molecule and does not hydrolyze, so its efficacy is essentially independent of pH from about 6 to 10. It does not react with ammonia, does not chlorinate organics to form trihalomethanes, is highly effective against biofilm and sulfide, and works at low residuals of a few tenths of a ppm. Because it is unstable and cannot be shipped compressed, it must be generated on site from sodium chlorite, which requires a generator, careful precursor handling and attention to the explosive concentration limit of the gas phase.",
+    "Selection follows the water and the contaminants. High pH favors bromine over chlorine. Ammonia contamination, a real risk in refinery service from sour water leaks, strongly favors bromine or chlorine dioxide because chlorine is consumed into useless chloramines. Heavy biofilm or sulfide favors chlorine dioxide. High organic loading or a wooden tower favors stabilized halogen. Cost, existing infrastructure and the plant's discharge permit for halogenated byproducts usually settle the final choice."
+  ],
+  keyTerms: ["Hypobromous acid", "Sodium bromide activation", "BCDMH", "Sulfamic stabilization", "Chlorine dioxide"],
+  questions: [
+    { q: "Bromine is often preferred over chlorine in alkaline cooling systems because:",
+      options: ["Bromine is cheaper per pound of active halogen", "HOBr has a higher pKa (about 8.7), so more stays in the active form at high pH", "Bromine does not corrode copper", "Bromine cannot form combined residuals"], answer: 1,
+      why: "The higher pKa means a much greater active fraction at pH 8 to 8.8, where hypochlorous acid has largely dissociated." },
+    { q: "Bromine is usually generated in a cooling system by:",
+      options: ["Direct injection of liquid bromine", "Feeding sodium bromide and oxidizing it with chlorine or bleach", "Electrolysis of calcium bromide in the tower basin", "Thermal decomposition of BCDMH in the hot well"], answer: 1,
+      why: "In-situ activation of sodium bromide with chlorine or hypochlorite produces hypobromous acid safely and economically." },
+    { q: "A key advantage of bromamines over chloramines is that bromamines:",
+      options: ["Are completely non-corrosive", "Retain substantial biocidal activity", "Cannot form at all in cooling water", "Are undetectable by standard test kits"], answer: 1,
+      why: "Bromamines remain effective biocides, whereas chloramines are far weaker than free chlorine, which matters greatly when ammonia is present." },
+    { q: "Chlorine dioxide's efficacy is largely independent of pH because it:",
+      options: ["Is fed at very high concentration", "Exists as a dissolved neutral gas and does not hydrolyze or dissociate", "Reacts preferentially with ammonia", "Is buffered by sulfamic acid"], answer: 1,
+      why: "ClO2 remains a neutral dissolved molecule across roughly pH 6 to 10, so it does not lose activity as pH rises the way chlorine does." },
+    { q: "The primary trade-off of sulfamic-acid-stabilized halogen is:",
+      options: ["It cannot be used above pH 7", "Slower kill rate requiring longer contact time, in exchange for less attack on inhibitors and equipment", "It forms large amounts of trihalomethanes", "It requires an on-site generator"], answer: 1,
+      why: "Stabilization reduces reactivity toward azoles, phosphonates, wood and copper and extends persistence, but slows the kill and needs more contact time." }
+  ]
+},
+{
+  id: 13,
+  title: "Non-Oxidizing Biocides",
+  category: "Microbiological Control",
+  difficulty: 2,
+  blurb: "Isothiazolinone, glutaraldehyde, DBNPA and quats - and why you alternate them.",
+  paragraphs: [
+    "Oxidizing biocides are fast, cheap and non-selective, but they are consumed by everything in the water and they penetrate mature biofilm poorly. Non-oxidizing biocides complement them by attacking specific biological targets, persisting longer, and reaching organisms that survive under deposits. They are normally slug-dosed to achieve a lethal concentration for a defined contact time rather than being held at a continuous residual, and the tower must be considered as a system with a defined half-life so that blowdown does not sweep the dose out before it works.",
+    "Isothiazolinones, typically a blend of methylchloro- and methyl-isothiazolinone, are broad-spectrum, effective at a few ppm and widely used, working by reacting with thiol groups in microbial proteins. They are deactivated by reducing agents such as bisulfite and by high sulfide levels, and they are sensitizers requiring careful handling. Glutaraldehyde is a dialdehyde that crosslinks proteins and cell wall amines, is effective against sulfate-reducing bacteria and biofilm, tolerates a wide pH range and is not deactivated by hydrogen sulfide, but it is deactivated by ammonia and primary amines, which react with the aldehyde groups.",
+    "DBNPA (2,2-dibromo-3-nitrilopropionamide) is notable for a very fast kill combined with rapid hydrolysis, especially at alkaline pH. That makes it attractive where a quick knockdown is wanted with minimal biocide residual reaching the discharge, though its short life means it does little to prevent regrowth. Quaternary ammonium compounds are cationic surfactants that disrupt cell membranes and have useful surface-active and biodispersant properties, but they foam, they are deactivated by anionic species including many dispersant polymers, and their performance falls off in hard or dirty water.",
+    "Because bacterial populations adapt, standard practice is to alternate two or more non-oxidizing biocides with different modes of action on a rotating schedule, overlaid on a continuous or semi-continuous oxidant program. Biodispersants, which are non-biocidal surfactants, are frequently added ahead of a biocide slug to penetrate and loosen the biofilm matrix so the biocide can reach the organisms beneath it. Compatibility must be checked in every direction: an anionic dispersant will neutralize a quat, bisulfite dechlorination will kill an isothiazolinone, and ammonia contamination will disarm glutaraldehyde."
+  ],
+  keyTerms: ["Slug dose", "Isothiazolinone", "Glutaraldehyde", "DBNPA", "Quaternary ammonium", "Biodispersant"],
+  questions: [
+    { q: "Non-oxidizing biocides are typically applied by:",
+      options: ["Maintaining a continuous low residual like chlorine", "Slug dosing to a lethal concentration held for a defined contact time", "Adding them to the makeup water clarifier", "Injecting them into the drift eliminators"], answer: 1,
+      why: "Non-oxidizers are dosed as periodic slugs to reach a lethal concentration and are allowed to act over a contact time before blowdown removes them." },
+    { q: "Glutaraldehyde is deactivated by:",
+      options: ["Hydrogen sulfide", "Ammonia and primary amines", "Chloride ion", "Low pH only"], answer: 1,
+      why: "Ammonia and primary amines react with the aldehyde groups. Notably, glutaraldehyde tolerates sulfide well, unlike isothiazolinones." },
+    { q: "DBNPA is characterized by:",
+      options: ["Very long persistence in alkaline water", "Fast kill and rapid hydrolysis, leaving little residual", "Effectiveness only against algae", "Strong foaming tendency"], answer: 1,
+      why: "DBNPA kills quickly and then hydrolyzes rapidly, especially at alkaline pH, which limits discharge residual but does little against regrowth." },
+    { q: "Quaternary ammonium biocides are deactivated by:",
+      options: ["Anionic species including many dispersant polymers", "Cationic polymers", "Dissolved oxygen", "Elevated temperature alone"], answer: 0,
+      why: "Quats are cationic surfactants and are neutralized by anionic materials such as the polyacrylate dispersants used in the same program." },
+    { q: "Biocides with different modes of action are alternated primarily to:",
+      options: ["Reduce chemical cost", "Prevent microbial populations from adapting to a single biocide", "Comply with drift eliminator standards", "Increase cycles of concentration"], answer: 1,
+      why: "Rotating modes of action prevents resistant populations from establishing and covers organisms that a single chemistry misses." }
+  ]
+},
+{
+  id: 14,
+  title: "Biofilm and Microbiologically Influenced Corrosion",
+  category: "Microbiological Control",
+  difficulty: 3,
+  blurb: "Why a slime layer insulates better than scale and hides sulfate reducers underneath.",
+  paragraphs: [
+    "Biofilm forms when planktonic organisms attach to a wetted surface and secrete extracellular polymeric substance, a hydrated gel of polysaccharides and proteins that anchors the community and shields it. Biofilm is far more consequential than its mass suggests. Its thermal conductivity is very low, comparable to or worse than calcium carbonate scale on a per-thickness basis, so a slime layer a few thousandths of an inch thick can rob more heat transfer than a much thicker mineral deposit. It also increases surface roughness and pressure drop, and it traps silt and corrosion products, compounding the fouling.",
+    "The EPS matrix is also a chemical shield. Oxidizing biocide is consumed at the outer surface of the film before it can diffuse to the organisms deeper in, so the concentration reaching a sessile population beneath a mature biofilm may be a small fraction of the bulk residual. This is why bulk water plate counts can look acceptable while the exchangers are fouling: planktonic counts measure the organisms floating past, not the sessile community actually causing the damage. Direct assessment through biofilm coupons, ATP measurement of sessile populations or side-stream monitors gives a truer picture.",
+    "Beneath the film the environment inverts. Aerobic organisms at the surface consume the oxygen, creating an anaerobic zone at the metal where sulfate-reducing bacteria (SRB) thrive. SRB reduce sulfate to sulfide, producing an acidic, sulfide-rich microenvironment that attacks steel aggressively and leaves the characteristic signature of black iron sulfide deposits, a rotten-egg odor when the deposit is acidified, and shiny hemispherical pits under the tubercle. Acid-producing bacteria, iron-oxidizing bacteria such as Gallionella that build tubercles, and nitrifiers that convert ammonia to nitric acid and depress pH all contribute their own attack mechanisms.",
+    "Control therefore has to be mechanical as well as chemical. Maintaining velocity above roughly 3 ft/s discourages attachment, keeping suspended solids dispersed removes the shelter that biofilm needs, and periodic mechanical cleaning removes what chemistry cannot reach. Chemically, biodispersants applied ahead of a biocide penetrate the EPS, and alternating oxidizer with penetrating non-oxidizers such as glutaraldehyde reaches the SRB underneath. Once tubercles are established, no biocide program alone will restore the surface; the deposits must be physically removed."
+  ],
+  keyTerms: ["EPS matrix", "Sessile vs planktonic", "Sulfate-reducing bacteria", "Tubercle", "MIC", "ATP monitoring"],
+  questions: [
+    { q: "Compared with calcium carbonate scale of the same thickness, biofilm:",
+      options: ["Conducts heat much better", "Insulates comparably or worse, so a thin layer is very damaging", "Has no effect on heat transfer", "Only affects pressure drop"], answer: 1,
+      why: "Biofilm's thermal conductivity is very low. A film a few thousandths of an inch thick can cost more heat transfer than far thicker mineral scale." },
+    { q: "Acceptable bulk-water planktonic bacteria counts can coexist with severe fouling because:",
+      options: ["Plate counts are always inaccurate", "Planktonic counts measure organisms in the water, not the sessile biofilm community on surfaces", "Biofilm does not contain bacteria", "Sessile organisms die during sampling"], answer: 1,
+      why: "The damage is done by attached sessile populations. Bulk counts miss them, so biofilm coupons, ATP or side-stream monitors are needed." },
+    { q: "Sulfate-reducing bacteria cause damage primarily by:",
+      options: ["Producing oxygen at the metal surface", "Generating sulfide and acidity in the anaerobic zone beneath biofilm", "Consuming the azole inhibitor", "Raising the bulk water pH"], answer: 1,
+      why: "SRB reduce sulfate to sulfide in the oxygen-depleted zone under the film, creating an aggressive acidic, sulfide-rich local environment." },
+    { q: "The classic field signature of SRB attack is:",
+      options: ["White crystalline deposits and high pH", "Black iron sulfide deposits, rotten-egg odor on acidification, and shiny hemispherical pits", "Green copper staining", "Reddish tubercles only"], answer: 1,
+      why: "Black sulfide corrosion product, hydrogen sulfide odor when acidified, and bright hemispherical pits beneath the deposit are diagnostic." },
+    { q: "A biodispersant is typically applied ahead of a biocide slug in order to:",
+      options: ["Neutralize residual chlorine", "Penetrate and loosen the EPS matrix so biocide can reach the organisms", "Raise pH for better kill", "Increase the biocide's half-life"], answer: 1,
+      why: "The EPS shields sessile organisms from oxidant. A surfactant biodispersant breaks up the matrix so biocide contacts the cells." }
+  ]
+},
+{
+  id: 15,
+  title: "Legionella Control in Cooling Towers",
+  category: "Microbiological Control",
+  difficulty: 2,
+  blurb: "Aerosols, amoebae and the standards that govern a genuine public health hazard.",
+  paragraphs: [
+    "Legionella pneumophila is a bacterium that causes Legionnaires' disease, a severe pneumonia, and the milder Pontiac fever. Infection occurs by inhaling contaminated aerosol; the organism is not transmitted person to person and drinking contaminated water is not the route of concern. Cooling towers are a recognized source because they generate large volumes of fine aerosol, discharge it at elevation where it can travel considerable distances downwind, and provide the warm water and nutrient conditions the organism favors. Several of the largest documented outbreaks have been traced to industrial and building cooling towers.",
+    "The organism grows in the roughly 77 to 113 degrees F range, squarely within normal cooling tower operating temperature, and it survives and multiplies inside free-living protozoa such as amoebae. That intracellular habit is central: amoebae and biofilm both shield Legionella from biocide, so a control program that ignores biofilm and protozoa will not control Legionella regardless of the residual carried in the bulk water. Stagnant legs, idle towers, sediment in the basin, and warm dead-end piping are the classic amplification sites.",
+    "Control rests on several pillars applied together. Maintain a consistent oxidizing biocide residual rather than intermittent treatment; control biofilm with dispersants and rotating non-oxidizers; keep the basin free of sediment and organic debris through routine cleaning and filtration; specify high-efficiency drift eliminators to cut aerosol release at the source; and eliminate stagnation with proper piping design and by treating idle equipment. Any tower returning from an idle period should be disinfected before being placed back in service, and towers should be inspected and cleaned on a defined schedule.",
+    "The governing framework in the United States is ANSI/ASHRAE Standard 188, which requires building owners to develop a water management program covering hazard analysis, control measures, control limits, monitoring, corrective actions and verification. ASHRAE Guideline 12 gives supporting technical guidance, and CDC's Legionella control toolkit provides a practical implementation path. Culture testing on standard media (BCYE agar) is the reference method for confirming Legionella presence, though routine testing frequency and action levels remain a program decision. The regulatory picture is tightening, with several jurisdictions such as New York State imposing registration, mandatory sampling and reporting requirements on cooling towers."
+  ],
+  keyTerms: ["Aerosol transmission", "Amoebae", "Drift eliminators", "ASHRAE 188", "Water management program"],
+  questions: [
+    { q: "Legionella infection from a cooling tower occurs by:",
+      options: ["Drinking contaminated water", "Inhaling contaminated aerosol", "Skin contact with basin water", "Person-to-person transmission"], answer: 1,
+      why: "The route is inhalation of aerosolized water. Legionella is not spread person to person and ingestion is not the concern for tower exposure." },
+    { q: "Legionella is particularly difficult to control because it:",
+      options: ["Is resistant to all known biocides", "Survives and multiplies inside protozoa such as amoebae and within biofilm", "Grows only above 140 degrees F", "Cannot be detected by any laboratory method"], answer: 1,
+      why: "Intracellular residence in amoebae plus the shelter of biofilm protects it from bulk-water biocide residuals." },
+    { q: "Which measure reduces Legionella risk at the point of aerosol release?",
+      options: ["Increasing cycles of concentration", "High-efficiency drift eliminators", "Lowering the system pH", "Increasing the cooling range"], answer: 1,
+      why: "Drift eliminators cut the volume of aerosol leaving the tower, directly reducing the exposure pathway." },
+    { q: "The US standard requiring a formal water management program for building water systems including cooling towers is:",
+      options: ["ASHRAE Standard 188", "NACE MR0175", "API 660", "ASME Section VIII"], answer: 0,
+      why: "ANSI/ASHRAE 188 establishes the water management program requirement; Guideline 12 and the CDC toolkit provide supporting guidance." },
+    { q: "A cooling tower returning to service after an extended idle period should be:",
+      options: ["Placed directly into service to restore flow quickly", "Disinfected before return to service", "Operated at reduced pH for a week", "Left untreated until counts are measured"], answer: 1,
+      why: "Stagnant idle systems are classic amplification sites. Disinfection before restart prevents discharging an amplified population as aerosol." }
+  ]
+},
+{
+  id: 16,
+  title: "Hydrocarbon Process Leaks",
+  category: "Refinery Operations",
+  difficulty: 3,
+  blurb: "The upset that is unique to refinery cooling water - and the fastest way to lose a program.",
+  paragraphs: [
+    "The defining difference between a refinery cooling system and a comparable utility or HVAC system is that the cooling water is separated from flammable, often sour process fluid by nothing more than an exchanger tube wall. Refinery exchangers usually run process side at higher pressure than water side specifically so that a tube failure leaks process into water rather than water into process, which protects the unit but delivers the contamination straight into the cooling loop. A single tube leak can put hydrocarbon into a tower in minutes.",
+    "The consequences cascade quickly. Hydrocarbon coats heat transfer surfaces with an oily film that destroys heat transfer and traps solids, causing rapid fouling. It exerts an enormous oxidant demand that strips the halogen residual and leaves the system biologically unprotected. It is itself a rich nutrient source, so bacterial and fungal populations explode, often within a single day. It causes severe foaming in the tower, with foam overflowing the basin and carrying treated water out of the system. Light hydrocarbons flash off in the tower and create a flammable vapor hazard around the fan deck, which is a genuine safety issue and a documented cause of tower fires, and the resulting VOC emissions are a permit concern.",
+    "Detection relies on continuous monitoring at the tower return header and at individual exchanger outlets. Common tools include hydrocarbon analyzers on the return line, combustible gas detection at the tower fan deck, and continuous or grab analysis for total organic carbon, oil and grease, or LEL. Sudden foaming, a visible sheen on the basin, a sharp drop in oxidant residual, an unexplained spike in bacterial counts, or an odor at the tower are all field indicators that a leak has occurred, and isolating which exchanger is leaking is done by systematically sampling individual outlets.",
+    "The response is a defined sequence: find and isolate the leaking exchanger, apply an antifoam to regain basin control, dramatically increase biocide feed to overcome the demand and suppress the biological bloom, add a specialized oil-dispersant or surfactant to emulsify and remove the hydrocarbon, increase blowdown to purge contamination, and monitor for flammable vapor around the tower. Because contaminated blowdown may not be dischargeable, coordination with wastewater treatment is required. The permanent fix is repair or plugging of the failed tube."
+  ],
+  keyTerms: ["Tube leak", "Oxidant demand", "Foaming", "LEL monitoring", "Oil dispersant", "Antifoam"],
+  questions: [
+    { q: "Refinery exchangers are typically designed with process pressure above water pressure so that:",
+      options: ["Heat transfer is improved", "A tube leak sends process into the water rather than water into the process", "Cooling water flow is reduced", "Fouling is eliminated"], answer: 1,
+      why: "Protecting product quality and unit operation takes priority, so leaks are directed into the cooling water, which is why refinery towers see hydrocarbon contamination." },
+    { q: "The most immediate biological consequence of a hydrocarbon leak is:",
+      options: ["Bacteria are killed by the hydrocarbon toxicity", "Oxidant residual is consumed and microbial populations bloom on the nutrient", "pH rises sharply", "Cycles of concentration increase"], answer: 1,
+      why: "Hydrocarbon exerts huge oxidant demand, stripping the halogen residual, while simultaneously feeding the microbial population." },
+    { q: "Light hydrocarbon in a cooling tower creates a safety hazard because:",
+      options: ["It raises the water temperature", "It flashes off in the tower creating flammable vapor at the fan deck", "It increases drift losses", "It corrodes the drift eliminators"], answer: 1,
+      why: "Volatile components strip out in the air stream and can create a flammable atmosphere around the tower, a documented cause of cooling tower fires." },
+    { q: "Which is a typical field indicator of a hydrocarbon leak into cooling water?",
+      options: ["A gradual rise in calcium hardness", "Sudden foaming, a sheen on the basin, and a sharp drop in oxidant residual", "A slow decrease in conductivity", "Improved heat transfer"], answer: 1,
+      why: "Foaming, visible sheen, collapsing halogen residual and a spike in bacterial counts together point strongly to hydrocarbon ingress." },
+    { q: "An appropriate immediate response to confirmed hydrocarbon contamination includes all EXCEPT:",
+      options: ["Feeding antifoam to regain basin control", "Increasing biocide feed to overcome the demand", "Reducing blowdown to conserve treatment chemical", "Isolating the leaking exchanger"], answer: 2,
+      why: "Blowdown should be increased to purge contamination, not reduced. Conserving chemical is not the priority during an active contamination event." }
+  ]
+},
+{
+  id: 17,
+  title: "Ammonia and Sour Water Contamination",
+  category: "Refinery Operations",
+  difficulty: 3,
+  blurb: "Chlorine demand, nitrification and stress corrosion cracking of admiralty brass.",
+  paragraphs: [
+    "Ammonia reaches cooling water from leaks in sour water strippers, overhead condensers, hydrotreater effluent coolers and similar services where aqueous ammonia is present in the process stream. It is one of the most disruptive contaminants a refinery cooling system can receive because it attacks the program on three independent fronts at once, and unlike hydrocarbon it is invisible and produces no sheen or foam to announce itself.",
+    "The first effect is on the biocide program. Ammonia reacts preferentially with free chlorine to form monochloramine, dichloramine and trichloramine. Chloramines register on a total chlorine test but are far weaker biocides, so the system may show a comfortable total residual while free residual is zero and effective disinfection has ceased. Roughly 8 to 10 parts of chlorine are consumed per part of ammonia nitrogen to reach breakpoint, so even modest ammonia ingress can overwhelm a normal feed rate. This is the classic case for switching to bromine, whose bromamines stay active, or to chlorine dioxide, which does not react with ammonia at all.",
+    "The second effect is corrosive attack on copper alloys. Ammonia complexes copper as the cupra-ammonium ion, dissolving the protective film and greatly accelerating copper corrosion. More seriously, ammonia is the classic agent of stress corrosion cracking in brasses. Admiralty and aluminum brass tubing carrying residual manufacturing or rolling stresses can crack in ammoniacal water, and season cracking of brass in ammonia environments is a long-documented failure mode. Because the cracking is transgranular or intergranular and requires no significant metal loss, it can produce sudden through-wall failure with little warning from corrosion coupons.",
+    "The third effect is nitrification. Nitrifying bacteria oxidize ammonia to nitrite and then to nitrate, generating acid in the process and depressing system pH, which consumes alkalinity, upsets the acid feed control loop and can push a carefully balanced alkaline program into corrosive territory. Detection is by routine ammonia, nitrite and nitrate analysis on the recirculating water plus watching for an unexplained free chlorine collapse or acid demand change. Response is to find and isolate the leak, switch halogen chemistry, raise azole feed to protect the copper, and increase blowdown."
+  ],
+  keyTerms: ["Chloramine", "Breakpoint chlorination", "Cupra-ammonium ion", "Stress corrosion cracking", "Nitrification"],
+  questions: [
+    { q: "Approximately how much chlorine is consumed per part of ammonia nitrogen to reach breakpoint?",
+      options: ["About 1 part", "About 8 to 10 parts", "About 100 parts", "Chlorine does not react with ammonia"], answer: 1,
+      why: "Breakpoint chlorination requires roughly 8 to 10 parts chlorine per part of ammonia nitrogen, so modest ammonia ingress swamps a normal feed rate." },
+    { q: "Ammonia contamination is especially dangerous to admiralty brass tubing because it can cause:",
+      options: ["Uniform thinning only", "Stress corrosion cracking with little metal loss and sudden failure", "Increased heat transfer", "Silica deposition"], answer: 1,
+      why: "Ammonia is the classic agent of season cracking in brasses. Cracking needs residual stress but almost no metal loss, so coupons give little warning." },
+    { q: "In an ammonia-contaminated system, the preferred oxidant strategy is usually to:",
+      options: ["Increase chlorine dose and continue as normal", "Switch to bromine or chlorine dioxide", "Stop all oxidant feed", "Switch to a quaternary ammonium biocide"], answer: 1,
+      why: "Bromamines retain biocidal activity and chlorine dioxide does not react with ammonia, so both sidestep the chloramine problem." },
+    { q: "Nitrification in a cooling system causes:",
+      options: ["A rise in pH and alkalinity", "Acid generation that depresses pH and consumes alkalinity", "Precipitation of calcium carbonate", "An increase in free chlorine residual"], answer: 1,
+      why: "Biological oxidation of ammonia to nitrite and nitrate generates acid, depleting alkalinity and depressing pH." },
+    { q: "Compared with a hydrocarbon leak, an ammonia leak is harder to detect in the field because it:",
+      options: ["Produces no sheen or foam and is not visible", "Always occurs at night", "Cannot be measured in the laboratory", "Raises the water temperature dramatically"], answer: 0,
+      why: "Ammonia gives no visual signature. Detection depends on ammonia/nitrite/nitrate analysis and on noticing free chlorine collapse or acid demand changes." }
+  ]
+},
+{
+  id: 18,
+  title: "Suspended Solids and Sidestream Filtration",
+  category: "Deposit Control",
+  difficulty: 1,
+  blurb: "The tower as an air scrubber, and how to get the dirt back out.",
+  paragraphs: [
+    "A cooling tower is an extraordinarily efficient air washer. Tens or hundreds of thousands of cubic feet per minute of ambient air pass through the fill in intimate contact with falling water, and the water strips out dust, pollen, insects, catalyst fines, coke dust, and in a refinery setting particulates from flares, furnaces, FCC units and nearby roadways. The tower also collects windblown debris and, in outdoor basins, leaves and organic matter. None of this shows in the makeup water analysis, which is why a system can have excellent makeup quality and still accumulate a heavy solids load.",
+    "Suspended solids cause damage out of proportion to their apparent innocence. They settle in low-velocity zones such as tower basins, exchanger bottoms, dead legs and idle equipment, forming deposits that insulate heat transfer surfaces and, critically, establish the oxygen-depleted crevices where under-deposit corrosion and sulfate-reducing bacteria take hold. They provide the physical shelter and the attachment surface that biofilm needs. They abrade pump internals and tube inlets. And they adsorb treatment chemicals, so a heavily fouled system consumes inhibitor without getting the benefit.",
+    "Sidestream filtration is the standard mechanical answer. A portion of the circulating flow, commonly 1 to 5 percent, is continuously drawn off, filtered, and returned. The rationale is that a modest continuous fraction turns over the whole inventory many times a day, so equilibrium solids concentration falls substantially even though any single pass removes only part of the load. Drawing the sidestream suction from the tower basin sump, where solids naturally settle, is far more effective than taking it from the clean discharge header.",
+    "Technology selection depends on the particle size distribution. Hydrocyclones (centrifugal separators) have no media, are effectively maintenance-free and handle high loads, but they only remove relatively large, dense particles, typically above 40 to 75 microns, and do nothing for fine silt. Sand or multimedia pressure filters remove down to roughly 10 microns and are the common workhorse. High-efficiency media, cartridge or automatic backwashing screen filters go finer but cost more and demand more attention. Filtration works with the chemical program, not instead of it: dispersant polymers keep particles small and suspended so that the filter can actually capture them rather than letting them agglomerate and settle out of reach."
+  ],
+  keyTerms: ["Air scrubbing", "Sidestream filtration", "Hydrocyclone", "Multimedia filter", "Basin sweeping"],
+  questions: [
+    { q: "The main source of suspended solids in a well-run cooling system is usually:",
+      options: ["The makeup water", "Airborne debris scrubbed from the air passing through the tower", "The treatment chemicals", "Evaporation"], answer: 1,
+      why: "The tower acts as an air washer, capturing dust, catalyst fines, coke dust and other particulates that never appear in a makeup water analysis." },
+    { q: "A typical sidestream filtration rate is:",
+      options: ["1 to 5 percent of the circulating flow", "25 to 50 percent of the circulating flow", "100 percent of the circulating flow", "Equal to the blowdown rate"], answer: 0,
+      why: "A continuous 1 to 5 percent sidestream turns over the system inventory many times daily, substantially lowering equilibrium solids." },
+    { q: "The best suction point for a sidestream filter is generally:",
+      options: ["The exchanger discharge header", "The tower basin sump where solids settle", "The makeup water line", "The blowdown line downstream of the controller"], answer: 1,
+      why: "Drawing from the basin sump captures the settled solids where they accumulate, rather than filtering already-clean water." },
+    { q: "Hydrocyclone (centrifugal) separators are limited because they:",
+      options: ["Require frequent media replacement", "Only remove relatively large, dense particles and miss fine silt", "Cannot handle high solids loading", "Only work below 60 degrees F"], answer: 1,
+      why: "Centrifugal separation depends on particle mass, so removal is typically limited to particles above roughly 40 to 75 microns." },
+    { q: "Suspended solids contribute to corrosion mainly by:",
+      options: ["Raising the water conductivity", "Settling to form deposits that create oxygen-depleted crevices for under-deposit attack", "Increasing the LSI", "Consuming dissolved oxygen directly"], answer: 1,
+      why: "Settled solids establish differential aeration cells and shelter sulfate-reducing bacteria, both of which drive localized attack." }
+  ]
+},
+{
+  id: 19,
+  title: "Silica and Magnesium Silicate Scale",
+  category: "Scale Control",
+  difficulty: 3,
+  blurb: "The hardest scale to remove and the one that most often caps your cycles.",
+  paragraphs: [
+    "Silica behaves unlike the other scale formers in cooling water. Amorphous silica has a solubility of roughly 150 ppm as SiO2 at ambient temperature and, unusually, that solubility increases with temperature rather than decreasing. Silica deposition is therefore governed not by hot skin temperature but by the bulk concentration reaching the polymerization limit. When supersaturated, dissolved monomeric silicic acid polymerizes into colloidal silica and eventually deposits as a hard, glassy, vitreous layer that is essentially unattacked by the acid cleaning that removes carbonate scale. Removing silica scale generally requires hydrofluoric acid or ammonium bifluoride, which brings serious safety and materials constraints, so silica is a scale to be prevented rather than cured.",
+    "Silica solubility falls as pH decreases below about 7, and rises at high pH where silicic acid ionizes to silicate. That behavior is the opposite of calcium carbonate and creates a genuine conflict: feeding acid to control carbonate scale pushes the water toward the silica-unfavorable region, while running high pH to solubilize silica aggravates carbonate and phosphate scaling. Systems on high-silica makeup, common with western US well waters, therefore have a narrow operating band.",
+    "Magnesium silicate is often the more immediate practical limit. It forms when magnesium hardness and silica are both elevated and pH is high, and it is frequently controlled by an empirical product rule in which the magnesium hardness as CaCO3 multiplied by the silica as SiO2 is held below a limit on the order of 20,000 to 35,000, depending on the source and the temperature. Iron and aluminum dramatically worsen silica fouling, since both co-precipitate readily with silica to form very tenacious deposits, so iron control from corrosion or makeup and alum carryover from a clarifier are both direct silica risks.",
+    "Control options are limited compared with carbonate. Traditional practice caps cycles so that silica stays below roughly 150 ppm, and many systems on high-silica water are silica-limited rather than hardness-limited. Specialty silica inhibitors and dispersants, typically polymer blends and certain polyamines, can extend the limit to perhaps 200 to 300 ppm with careful control. The alternative is pretreatment: lime softening with magnesium addition removes silica by adsorption on magnesium hydroxide floc, and reverse osmosis rejects silica well, both of which raise the achievable cycles by lowering the makeup silica in the first place."
+  ],
+  keyTerms: ["Amorphous silica", "Polymerization", "Magnesium silicate", "Mg x SiO2 product", "Hydrofluoric acid cleaning"],
+  questions: [
+    { q: "Unlike calcium carbonate, silica solubility:",
+      options: ["Decreases as temperature rises", "Increases as temperature rises", "Is unaffected by pH", "Is highest at pH 5"], answer: 1,
+      why: "Silica solubility increases with temperature, so deposition is driven by bulk concentration reaching the polymerization limit rather than by hot skin temperature." },
+    { q: "A commonly cited conservative limit for silica in cooling water is about:",
+      options: ["15 ppm as SiO2", "150 ppm as SiO2", "1,500 ppm as SiO2", "5 ppm as SiO2"], answer: 1,
+      why: "Amorphous silica solubility is roughly 150 ppm as SiO2, and traditional practice caps cycles to stay below it absent a specialty inhibitor." },
+    { q: "Silica scale is particularly feared because it:",
+      options: ["Forms only in the tower basin", "Is glassy and hard, resisting normal acid cleaning and often requiring fluoride-based chemicals", "Dissolves readily in hydrochloric acid", "Is easily dispersed by any polyacrylate"], answer: 1,
+      why: "Vitreous silica resists the mineral acids used on carbonate scale; removal typically requires hydrofluoric acid or ammonium bifluoride." },
+    { q: "Magnesium silicate scaling risk is commonly evaluated using:",
+      options: ["The Langelier index", "A product of magnesium hardness (as CaCO3) times silica (as SiO2) held below roughly 20,000 to 35,000", "The Ryznar index", "The chloride to sulfate ratio"], answer: 1,
+      why: "An empirical Mg x SiO2 product limit is the standard screening rule for magnesium silicate deposition." },
+    { q: "Iron and aluminum in the cooling water worsen silica problems because they:",
+      options: ["Raise pH sharply", "Co-precipitate with silica to form very tenacious deposits", "Increase silica solubility", "Convert silica to silicate"], answer: 1,
+      why: "Both metals readily co-precipitate with silica, producing extremely adherent deposits, so iron control and avoiding alum carryover matter." }
+  ]
+},
+{
+  id: 20,
+  title: "Makeup Water Pretreatment",
+  category: "Fundamentals",
+  difficulty: 2,
+  blurb: "Clarification, softening and RO - fixing the water before it ever reaches the tower.",
+  paragraphs: [
+    "Everything that enters with the makeup water gets concentrated by the cycles of concentration, so a pound of hardness in the makeup becomes an increasingly severe problem as cycles rise. Pretreatment attacks the problem upstream, and its economic justification is usually that it raises achievable cycles, which cuts makeup volume, blowdown volume, sewer charges and inhibitor consumption all at once. The right choice depends entirely on the source water and on which constituent is limiting cycles.",
+    "Clarification handles surface water. Coagulation with alum or ferric salts neutralizes the charge on colloidal particles, flocculation with polymer builds settleable floc, and sedimentation plus filtration removes turbidity and much of the organic load. Lime softening goes further, adding hydrated lime to raise pH and precipitate calcium carbonate, with soda ash added where non-carbonate hardness must also be removed. Cold lime softening also removes a useful fraction of silica by adsorption onto magnesium hydroxide floc, which is often the real reason it is chosen. A caution specific to cooling systems is that residual coagulant carryover, particularly aluminum, is a potent fouling agent and a co-precipitant with silica.",
+    "Ion exchange softening replaces calcium and magnesium with sodium on a resin bed regenerated with brine. It removes essentially all hardness, which eliminates carbonate scale and allows very high cycles, but it does not reduce alkalinity or total dissolved solids. The result is a high-pH, high-alkalinity, high-sodium water that is scale-free but can be corrosive and may drive foaming, so softened makeup usually requires acid feed and a corrosion program built for the condition. Dealkalization by strong acid cation exchange or by acid feed with degasification addresses the alkalinity side.",
+    "Reverse osmosis removes 95 to 99 percent of dissolved solids including hardness, alkalinity and silica, producing an excellent makeup that permits very high cycles. Costs are capital, membrane replacement, energy and the concentrate stream, which is itself a disposal problem, plus a low-TDS permeate that is aggressive to steel and needs its own corrosion program. Many refineries now use treated municipal effluent as makeup, which conserves fresh water but introduces high ammonia, phosphate, nitrate and organic loading, and therefore forces a different biocide strategy and much tighter microbiological control."
+  ],
+  keyTerms: ["Clarification", "Lime softening", "Ion exchange", "Dealkalization", "Reverse osmosis", "Reclaimed water"],
+  questions: [
+    { q: "The primary economic justification for makeup water pretreatment is usually that it:",
+      options: ["Eliminates the need for corrosion inhibitors", "Raises achievable cycles, cutting makeup, blowdown and chemical use", "Reduces the tower fan power", "Removes the need for biocide"], answer: 1,
+      why: "Better makeup quality moves the limiting parameter, allowing higher cycles and reducing water, sewer and inhibitor costs together." },
+    { q: "Cold lime softening is often chosen in cooling service specifically because it:",
+      options: ["Removes silica by adsorption onto magnesium hydroxide floc", "Removes all dissolved oxygen", "Lowers the water temperature", "Eliminates the need for filtration"], answer: 0,
+      why: "In addition to hardness removal, lime softening with magnesium removes a useful fraction of silica, which is frequently the cycle-limiting species." },
+    { q: "Sodium ion exchange softening of cooling tower makeup:",
+      options: ["Removes hardness but not alkalinity or TDS", "Removes hardness, alkalinity and TDS together", "Removes silica preferentially", "Lowers pH significantly"], answer: 0,
+      why: "Softening exchanges calcium and magnesium for sodium. Alkalinity and total dissolved solids pass through, often producing a high-pH corrosive water." },
+    { q: "A specific cooling-system risk from clarifier operation is:",
+      options: ["Excess dissolved oxygen", "Aluminum coagulant carryover, which fouls and co-precipitates with silica", "Loss of all alkalinity", "Increased calcium hardness"], answer: 1,
+      why: "Residual alum carryover is a potent foulant and combines readily with silica to form very tenacious deposits." },
+    { q: "Using treated municipal effluent as cooling tower makeup primarily forces changes to the:",
+      options: ["Drift eliminator design", "Microbiological control strategy, because of high ammonia, phosphate and organic loading", "Fan blade material", "Basin structural design"], answer: 1,
+      why: "Reclaimed water brings ammonia, nutrients and organics that consume oxidant and feed growth, requiring a different biocide approach and tighter control." }
+  ]
+},
+{
+  id: 21,
+  title: "Chemical Feed and Automated Control",
+  category: "Monitoring",
+  difficulty: 2,
+  blurb: "Conductivity, ORP, pH and tracer control - closing the loop on the program.",
+  paragraphs: [
+    "A treatment program is only as good as its delivery. Conductivity control is the foundation: a conductivity probe in the recirculating water operates a blowdown valve against a setpoint corresponding to the target cycles, and inhibitor feed is then either paced off makeup flow with a contacting water meter, paced off blowdown, or run proportional to conductivity. Feeding chemical on a simple timer regardless of load is a common and expensive failure mode, producing overfeed at low load and underfeed at high load, exactly when protection is needed most.",
+    "Oxidation-reduction potential is the standard control parameter for oxidizing biocide. An ORP probe reads the oxidizing power of the water in millivolts and controls the halogen feed pump against a setpoint typically in the 550 to 700 mV range. ORP responds fast and reflects the water's actual oxidizing capacity rather than a titrated concentration, which makes it well suited to systems with variable demand. Its limitations must be respected: the reading shifts with pH and temperature, probes foul and drift and require regular cleaning and verification against a manual free-halogen test, and contamination such as a sulfide or hydrocarbon leak can suppress ORP so that the controller feeds halogen continuously without ever reaching setpoint.",
+    "pH control is normally accomplished by feeding sulfuric acid to hold a setpoint that balances corrosion protection against scaling risk. Sulfuric acid feed carries genuine hazards. It is a strong acid requiring appropriate materials, containment and personal protection; a control failure can drive pH low enough to cause rapid general corrosion across the entire system in hours; and because acid converts alkalinity to sulfate, heavy acid feed raises sulfate and can push the water toward calcium sulfate saturation. Interlocks, low-pH alarms, flow-proven feed and independent pH verification are standard safeguards.",
+    "Modern controllers integrate these loops with inert fluorescent tracer measurement, which gives a direct reading of actual product concentration and cleanly separates a feed problem, where the tracer is low, from a consumption problem, where tracer is on target but active residual is low. Networked controllers with remote data access allow the service chemist to see trends continuously rather than during a monthly visit. None of this removes the need for manual verification: probes drift, pumps lose prime, suction lines air-lock, and drums run empty, so routine field testing against controller readings remains a core part of program stewardship."
+  ],
+  keyTerms: ["Conductivity control", "ORP setpoint", "Feed pacing", "Fluorescent tracer", "Acid feed interlocks"],
+  questions: [
+    { q: "ORP control of an oxidizing biocide typically targets a setpoint in the range of:",
+      options: ["50 to 150 mV", "550 to 700 mV", "1,500 to 2,000 mV", "0 to 50 mV"], answer: 1,
+      why: "Cooling systems commonly control halogen feed against an ORP setpoint of roughly 550 to 700 mV." },
+    { q: "A hydrocarbon or sulfide leak can defeat ORP control because it:",
+      options: ["Raises ORP above setpoint, stopping halogen feed", "Suppresses ORP so the controller feeds halogen continuously without reaching setpoint", "Has no effect on ORP", "Causes the probe to read pH instead"], answer: 1,
+      why: "Reducing contaminants depress the measured potential, so the controller keeps calling for oxidant, wasting chemical and still not disinfecting." },
+    { q: "The advantage of an inert fluorescent tracer in a treatment product is that it:",
+      options: ["Increases the inhibitor's effectiveness", "Distinguishes a feed failure from genuine chemical consumption", "Replaces the need for conductivity control", "Acts as a secondary biocide"], answer: 1,
+      why: "Tracer measures how much product is actually present. Low tracer means a feed problem; on-target tracer with low active residual means consumption." },
+    { q: "Feeding inhibitor on a fixed timer rather than pacing it to makeup or blowdown typically results in:",
+      options: ["Perfectly stable residuals", "Overfeed at low load and underfeed at high load", "Elimination of biological growth", "Higher cycles of concentration"], answer: 1,
+      why: "Chemical demand tracks water throughput. A fixed timer ignores load, so residuals swing exactly opposite to need." },
+    { q: "A specific chemistry side-effect of heavy sulfuric acid feed is:",
+      options: ["Increased silica solubility", "Rising sulfate, which can approach calcium sulfate saturation", "Reduced chloride concentration", "Increased total alkalinity"], answer: 1,
+      why: "Acid converts alkalinity to sulfate. Sustained heavy feed raises sulfate levels and can create a calcium sulfate scaling risk." }
+  ]
+},
+{
+  id: 22,
+  title: "Heat Exchanger Fouling and Performance",
+  category: "Deposit Control",
+  difficulty: 2,
+  blurb: "Fouling factors, approach temperature, and reading the tubes as a data source.",
+  paragraphs: [
+    "Deposits impose a thermal resistance in series with the tube wall, quantified as a fouling factor or fouling resistance. Exchangers are designed with a fouling allowance built in, historically often 0.001 to 0.002 hr-ft2-degF/Btu on the cooling water side, meaning the unit is oversized to keep meeting duty as it fouls. That allowance is a budget, and once it is consumed the exchanger falls below duty. The economic penalty is real and continuous: reduced throughput, higher pumping cost, elevated process temperatures, and eventually a forced shutdown to clean, which in a refinery may mean taking a whole unit offline.",
+    "Different deposits carry very different penalties per unit thickness. Calcium carbonate scale conducts far better than biofilm, so an equal thickness of slime is substantially more damaging thermally. This is why microbiological control is a heat transfer issue and not merely a hygiene issue, and why systems with acceptable mineral chemistry can still lose performance. Deposits also increase pressure drop and can restrict flow enough to reduce velocity, which then promotes further deposition, a self-reinforcing cycle that accelerates once it starts.",
+    "Performance monitoring converts these effects into numbers before failure occurs. Trending the temperature rise across an exchanger at known flow, comparing calculated overall heat transfer coefficient U against the clean design value, and watching pressure drop across the bundle all provide early warning. At the tower itself, the approach, meaning the difference between cold water temperature leaving the tower and the ambient wet bulb temperature, is the key indicator of tower thermal performance; a rising approach at constant load and wet bulb points to fill fouling, poor water distribution from plugged nozzles, air recirculation, or fan and drive problems.",
+    "The most valuable diagnostic remains physical evidence. Deposit samples pulled at turnaround and analyzed by loss on ignition, acid solubility and elemental or XRD analysis identify exactly what is forming, which points directly at the cause: calcium and carbonate mean a scale control failure, high organic content and loss on ignition mean biofouling, iron and sulfide mean corrosion and SRB activity, silicon and aluminum mean silica or clay, and phosphorus means calcium phosphate from the inhibitor program itself. A treatment program adjusted on deposit analysis is grounded in evidence rather than in indices."
+  ],
+  keyTerms: ["Fouling factor", "Overall U", "Approach temperature", "Loss on ignition", "Deposit analysis"],
+  questions: [
+    { q: "A typical cooling-water-side fouling allowance used in exchanger design is on the order of:",
+      options: ["0.001 to 0.002 hr-ft2-degF/Btu", "0.1 to 0.2 hr-ft2-degF/Btu", "1 to 2 hr-ft2-degF/Btu", "Exchangers are designed with no fouling allowance"], answer: 0,
+      why: "Cooling water fouling factors of roughly 0.001 to 0.002 are common design allowances, effectively a budget that fouling consumes over time." },
+    { q: "For equal thickness, which deposit generally imposes the greatest heat transfer penalty?",
+      options: ["Calcium carbonate scale", "Biofilm", "Iron oxide", "All are thermally identical"], answer: 1,
+      why: "Biofilm has very low thermal conductivity, so a thin slime layer costs more heat transfer than the same thickness of mineral scale." },
+    { q: "The 'approach' of a cooling tower is defined as the difference between:",
+      options: ["Hot and cold water temperatures", "Cold water temperature and ambient wet bulb temperature", "Dry bulb and wet bulb temperature", "Inlet and outlet air temperature"], answer: 1,
+      why: "Approach is cold water temperature minus ambient wet bulb. A rising approach at constant load signals fill fouling or distribution problems." },
+    { q: "A deposit analysis returning high loss on ignition and high organic content indicates:",
+      options: ["Calcium carbonate scale", "Biofouling", "Silica scale", "Calcium sulfate scale"], answer: 1,
+      why: "Organic material burns off on ignition, so high LOI points to biological fouling rather than mineral scale." },
+    { q: "Finding significant phosphorus in an exchanger deposit most likely indicates:",
+      options: ["A hydrocarbon leak", "Calcium phosphate deposition from the inhibitor program", "Silica polymerization", "Ammonia contamination"], answer: 1,
+      why: "Phosphorus in the deposit points to calcium phosphate, the characteristic failure mode of an alkaline phosphate program that has lost dispersant control." }
+  ]
+},
+{
+  id: 23,
+  title: "Cooling Tower Structure, Fill and Wood Deterioration",
+  category: "Deposit Control",
+  difficulty: 2,
+  blurb: "What the chemistry does to the tower itself, not just to the exchangers.",
+  paragraphs: [
+    "Treatment decisions affect the tower structure as directly as they affect the exchangers. Wooden towers, still common in older refineries, are built of redwood or pressure-treated Douglas fir and are subject to two distinct degradation mechanisms. Chemical attack, historically called delignification, occurs when oxidizing biocide dissolves the lignin binding the cellulose fibers, leaving a soft, white, fibrous surface that loses strength progressively. Sustained free chlorine residuals above roughly 1 ppm are commonly cited as accelerating this attack, which is a strong argument for stabilized halogen or careful residual control in wooden towers.",
+    "Biological attack on wood comes from fungi. Soft rot attacks continuously wet wood, while brown rot and white rot attack wood in the alternately wet and dry zones, particularly at the top deck, in the plenum area and around the distribution basins. Fungal attack can hollow out structural members while leaving the outer surface looking sound, so periodic structural inspection and probing is required rather than visual assessment alone. Pressure treatment with preservatives protects the wood, but treatment is lost where members are field-cut or drilled during repairs.",
+    "Film fill transformed tower efficiency by presenting very large surface area in thin closely spaced sheets, but that same geometry makes it uniquely vulnerable to fouling. Passages of a few millimeters plug readily with silt, biological growth, scale or hydrocarbon, and once flow is blocked the water short-circuits around the fouled section, which then dries and hardens. Fouled fill adds enormous weight, and collapse of fill packs from accumulated deposit weight is a documented failure mode capable of causing severe structural damage. In dirty service such as refinery cooling, splash fill or wider-spaced, low-fouling fill designs are often preferred despite lower thermal efficiency.",
+    "The tower also sets limits the treatment program has to respect. Galvanized steel components suffer white rust, a voluminous white zinc corrosion product that forms when a new galvanized surface is exposed to water with high pH and high alkalinity before the protective zinc carbonate patina develops. Passivation practice for new galvanized towers is to hold pH near 7 to 8 for the first several weeks of operation with controlled hardness and alkalinity. Concrete basins are attacked by low pH and by sulfate, and drift eliminators, distribution nozzles and the fan stack all require inspection because fouling there degrades both thermal performance and Legionella control."
+  ],
+  keyTerms: ["Delignification", "Soft rot", "Film fill fouling", "Splash fill", "White rust", "Galvanized passivation"],
+  questions: [
+    { q: "Chemical attack on wooden cooling tower structure by excess oxidizing biocide is called:",
+      options: ["Dezincification", "Delignification", "Nitrification", "Passivation"], answer: 1,
+      why: "Oxidant dissolves the lignin binding the cellulose fibers, leaving a soft white fibrous surface with progressively reduced strength." },
+    { q: "Sustained free chlorine residuals in a wooden tower are commonly limited to about:",
+      options: ["1 ppm or less", "5 to 10 ppm", "25 ppm", "There is no limit for wood"], answer: 0,
+      why: "Residuals above roughly 1 ppm accelerate delignification, which is why stabilized halogens and tight residual control suit wooden towers." },
+    { q: "Film fill is more prone to fouling than splash fill because it:",
+      options: ["Is made of wood", "Has narrow closely spaced passages that plug readily", "Requires higher water temperature", "Cannot be cleaned at all"], answer: 1,
+      why: "The thin, closely spaced sheets that give film fill its high surface area also plug easily with silt, slime, scale or hydrocarbon." },
+    { q: "The most serious mechanical consequence of severely fouled film fill is:",
+      options: ["Increased drift", "Collapse of fill packs from accumulated deposit weight", "Reduced fan noise", "Higher makeup water temperature"], answer: 1,
+      why: "Fouled fill becomes extremely heavy, and pack collapse is a documented cause of severe structural damage inside towers." },
+    { q: "White rust on a new galvanized cooling tower is prevented by:",
+      options: ["Running high pH and high alkalinity from startup", "Passivating at roughly pH 7 to 8 with controlled hardness and alkalinity for the first several weeks", "Feeding extra chlorine initially", "Operating at maximum cycles immediately"], answer: 1,
+      why: "Controlled near-neutral pH during initial operation allows a protective zinc carbonate patina to form instead of voluminous white zinc corrosion product." }
+  ]
+},
+{
+  id: 24,
+  title: "All-Organic and Phosphorus-Free Programs",
+  category: "Corrosion Control",
+  difficulty: 3,
+  blurb: "Where the industry went after chromate, and where it is going after phosphate.",
+  paragraphs: [
+    "Cooling water treatment has moved through successive generations driven mainly by environmental regulation. Chromate programs were extremely effective anodic inhibitors but were phased out of comprehensive US cooling tower service by EPA rule in the early 1990s because of chromium toxicity. Zinc-phosphate and alkaline phosphate programs took their place. Now phosphorus itself is under pressure, since phosphorus is a nutrient driving eutrophication and many refinery discharge permits have tightened phosphorus limits, while zinc faces its own aquatic toxicity limits in many receiving waters.",
+    "All-organic programs were the first response, combining phosphonates with polymers and azoles and relying heavily on running alkaline, where mild steel corrodes far more slowly, plus a controlled positive LSI so that a thin calcium carbonate film contributes to protection. These programs still contain phosphorus in the phosphonate, so they are low-phosphorus rather than phosphorus-free, but they eliminate the large orthophosphate residual of a conventional alkaline phosphate program and with it much of the calcium phosphate scaling risk.",
+    "Genuinely phosphorus-free chemistry relies on other film formers. Polymeric and copolymer inhibitors, organic corrosion inhibitors such as substituted carboxylates and amino acid derivatives, molybdate, and silicate-based treatments all appear in commercial programs. Molybdate is an effective and relatively non-toxic anodic inhibitor often blended at low levels with organics, though cost and molybdenum discharge limits constrain its use. All-polymer and polymer-plus-organic-inhibitor programs are now well established, generally requiring higher pH operation, closer control, and acceptance that mild steel corrosion rates may run somewhat higher than a well-tuned phosphate program delivers.",
+    "The practical lesson is that program selection is a constrained optimization, not a search for a single best chemistry. The constraints are the makeup water quality, the metallurgy in the system, the heat flux and skin temperatures, the discharge permit limits on phosphorus, zinc, molybdenum and halogenated organics, the cost of water and of chemical, and the plant's tolerance for operational complexity. A program that is excellent at one refinery may be unworkable at the plant next door because their discharge permit or their makeup source is different."
+  ],
+  keyTerms: ["Chromate phase-out", "All-organic program", "Molybdate", "Phosphorus-free", "Eutrophication limits"],
+  questions: [
+    { q: "Chromate cooling water programs were phased out in the United States primarily because of:",
+      options: ["Poor corrosion protection", "Chromium toxicity and EPA regulation", "Incompatibility with cooling towers", "Excessive cost"], answer: 1,
+      why: "Chromate was highly effective but toxic. EPA rulemaking in the early 1990s ended its use in comprehensive cooling tower programs." },
+    { q: "The current regulatory pressure driving phosphorus-free programs is mainly:",
+      options: ["Phosphorus toxicity to humans", "Phosphorus as a nutrient causing eutrophication in receiving waters", "Phosphorus corrosivity to steel", "Phosphorus flammability"], answer: 1,
+      why: "Phosphorus is a nutrient. Tightening discharge limits aimed at controlling eutrophication have pushed programs toward low- and non-phosphorus chemistry." },
+    { q: "So-called 'all-organic' programs are more accurately described as:",
+      options: ["Completely phosphorus-free", "Low-phosphorus, since phosphonates still contain phosphorus", "Chromate-based", "Zinc-based"], answer: 1,
+      why: "Phosphonates contain phosphorus. All-organic programs cut the large orthophosphate residual but are not truly phosphorus-free." },
+    { q: "Molybdate functions in cooling water treatment as:",
+      options: ["A cathodic inhibitor", "An anodic inhibitor, often blended at low levels with organics", "A biocide", "A dispersant"], answer: 1,
+      why: "Molybdate is an effective, relatively low-toxicity anodic inhibitor, though cost and discharge limits restrict how much can be used." },
+    { q: "All-organic and phosphorus-free programs generally depend on:",
+      options: ["Operating at low pH with acid feed", "Operating alkaline, where mild steel corrosion is inherently slower, with tight control", "Eliminating all dispersants", "Running negative LSI"], answer: 1,
+      why: "These programs lean on the sharply lower corrosion rate of carbon steel above about pH 8, plus a controlled positive LSI and careful monitoring." }
+  ]
+},
+{
+  id: 25,
+  title: "Layup, Startup and Discharge Compliance",
+  category: "Refinery Operations",
+  difficulty: 2,
+  blurb: "The turnaround chemistry that decides how the next run begins.",
+  paragraphs: [
+    "Idle equipment is one of the most reliably damaging conditions in a cooling system. Water sitting stagnant in an out-of-service exchanger loses its inhibitor by adsorption and decay, accumulates settled solids, goes anaerobic under the resulting deposits and grows a sulfate-reducing population, so a bundle can suffer more damage in a few weeks of idleness than in a year of service. Wet layup practice is to keep the equipment circulating periodically, maintain inhibitor and biocide residual, and test the stagnant water rather than assuming the main loop chemistry applies. Dry layup requires genuinely dry, since partially drained equipment with damp surfaces and free oxygen is the worst case of all.",
+    "Startup and commissioning chemistry is equally consequential. New carbon steel piping carries mill scale, oil, grease and weld flux, and if that debris is not removed it becomes the nucleus of under-deposit corrosion and fouling for the life of the system. Standard practice is a cleaning and degreasing circulation with an alkaline detergent and dispersant, a thorough flush, and then a passivation step at elevated inhibitor concentration, often several times the normal residual, to establish the protective film on clean metal before the system is placed in normal service. New galvanized towers require the separate near-neutral passivation described for white rust prevention.",
+    "Cooling tower blowdown is a permitted discharge in refinery service and its composition is a direct consequence of the treatment program. Parameters of concern typically include total dissolved solids, phosphorus, zinc, total residual chlorine or residual oxidant, halogenated organics including trihalomethanes, molybdenum where used, biocide residuals, temperature, pH and any hydrocarbon carried in from leaks. Dechlorination with sodium bisulfite before discharge is common where residual oxidant limits are tight, and blowdown is frequently routed to the refinery wastewater treatment plant rather than discharged directly.",
+    "Refinery cooling towers also carry an air-emissions and safety profile that a utility tower does not. Leaked hydrocarbon strips into the air stream and is reported as fugitive VOC emissions, which is why many refineries monitor cooling water for hydrocarbon under regulations addressing leak detection from heat exchange systems. Combined with the flammable vapor risk at the fan deck and the Legionella aerosol pathway, this makes the cooling tower a piece of equipment where water chemistry, process safety, environmental compliance and public health all intersect, and it is why cooling water treatment in a refinery is managed as an engineered program rather than a commodity chemical purchase."
+  ],
+  keyTerms: ["Wet layup", "Passivation", "Mill scale removal", "Dechlorination", "Fugitive VOC", "Blowdown permit"],
+  questions: [
+    { q: "The main risk of leaving an exchanger full of stagnant cooling water during an outage is:",
+      options: ["Excessive scale from evaporation", "Loss of inhibitor, solids settling, and anaerobic under-deposit attack with SRB growth", "Freezing of the tube bundle", "Dilution of the main loop chemistry"], answer: 1,
+      why: "Stagnant water loses residual and accumulates deposits, creating oxygen-depleted zones where sulfate-reducing bacteria drive rapid localized attack." },
+    { q: "Passivation of a new carbon steel system typically involves:",
+      options: ["Running at low pH for several days", "Circulating at elevated inhibitor concentration after cleaning to build the protective film", "Feeding maximum biocide only", "Operating at maximum cycles from the start"], answer: 1,
+      why: "After degreasing and removing mill scale, an elevated inhibitor dose establishes a protective film on clean metal before normal service begins." },
+    { q: "Cooling tower blowdown is commonly dechlorinated before discharge using:",
+      options: ["Sodium bisulfite", "Sulfuric acid", "Sodium hydroxide", "Calcium chloride"], answer: 0,
+      why: "Bisulfite reduces residual oxidant to meet total residual chlorine discharge limits, and is a standard dechlorination reagent." },
+    { q: "Refineries monitor cooling water for hydrocarbon partly because leaked hydrocarbon:",
+      options: ["Raises the water pH", "Strips into the air stream and is reported as fugitive VOC emissions", "Increases cycles of concentration", "Improves heat transfer temporarily"], answer: 1,
+      why: "Volatile hydrocarbon transfers to the air passing through the tower, creating a reportable fugitive emission as well as a flammability hazard." },
+    { q: "Why is dry layup only beneficial if the equipment is genuinely dry?",
+      options: ["Damp surfaces with free oxygen present the most aggressive corrosion condition", "Partially drained equipment freezes more readily", "Residual water dilutes the inhibitor", "Dry layup is never appropriate"], answer: 0,
+      why: "A thin water film with unlimited oxygen access corrodes faster than either full immersion or true dryness, so partial draining is the worst outcome." }
+  ]
+}
+];
+
+if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; }
