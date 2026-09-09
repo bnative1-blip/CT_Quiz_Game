@@ -677,6 +677,7 @@
   var db = null;             // resolved capability, or null
   var boardStop = null;      // onSnapshot unsubscribe
   var lastBoardDocs = null;  // last delivered rows, so the note can re-render alone
+  var postDenied = false;    // this viewer is not an editor, so cannot post a score
 
   /* ---- derived, mergeable totals ---- */
 
@@ -740,14 +741,20 @@
     var t = totals(state);
     var pid = state.profile.pid;
 
-    return db.doc("players/" + pid).update({
+    // The profile is writable by any viewer; the leaderboard is editors-only.
+    var saved = db.doc("players/" + pid).update({
       results: state.results,
       badges: state.badges,
       xp: state.xp,
       bestStreak: state.bestStreak,
       updated: Date.now()
-    }).then(function () {
-      if (t.modules < ELIGIBLE_MODULES) return;
+    }).catch(function (e) {
+      toast("Could not save your progress", (e && e.code) || "offline");
+    });
+
+    if (t.modules < ELIGIBLE_MODULES) return saved;
+
+    return saved.then(function () {
       return db.doc("leaderboard/" + pid).set({
         handle: state.profile.handle,
         score: t.score,
@@ -755,8 +762,17 @@
         accuracy: t.accuracy,
         updated: Date.now()
       });
+    }).then(function () {
+      if (postDenied) { postDenied = false; renderBoard(lastBoardDocs); }
     }).catch(function (e) {
-      toast("Could not save to your profile", (e && e.code) || "offline");
+      // There is no `user` capability on this contract, so the page cannot
+      // read the viewer's sharing level. A rejected write is how a
+      // non-editor finds out, so treat it as information, not an error.
+      if (e && e.code === "invalid_argument") {
+        if (!postDenied) { postDenied = true; renderBoard(lastBoardDocs); }
+      } else {
+        toast("Could not post your score", (e && e.code) || "offline");
+      }
     });
   }
 
@@ -950,7 +966,14 @@
 
     // eligibility / next-step line
     note.textContent = "";
-    if (!state.profile) {
+    if (postDenied) {
+      note.appendChild(document.createTextNode(
+        "Your standing is shown below for reference, but this board only accepts scores from "));
+      note.appendChild(el("b", "", "editors"));
+      note.appendChild(document.createTextNode(
+        ". Ask whoever shared this page for edit access if you want a permanent spot. "
+        + "Your progress still saves to your profile."));
+    } else if (!state.profile) {
       note.appendChild(document.createTextNode(
         "You are playing locally. Create a profile to carry progress between browsers and post a score. "));
       note.appendChild(el("b", "", t.modules + " of " + ELIGIBLE_MODULES + " qualifying modules done."));
@@ -961,7 +984,8 @@
       note.appendChild(document.createTextNode(
         " to qualify. Your score counts your best run of each module, so replays can only help."));
     }
-    $("boardTag").textContent = "Top " + BOARD_SIZE + " · " + ELIGIBLE_MODULES + " modules to qualify";
+    $("boardTag").textContent = "Top " + BOARD_SIZE + " · " + ELIGIBLE_MODULES
+      + " modules to qualify · editors post";
   }
 
   function rowSpan(text) {

@@ -64,8 +64,11 @@ viewer is and has to manage identity itself. That has real limits, and the UI sa
 - The store is readable by anyone who can open the page, so those salts and hashes are
   visible to other players. PBKDF2 makes guessing expensive, not impossible. **Treat the
   passphrase as throwaway and never reuse a real one.**
-- Writes are last-writer-wins with no per-player enforcement, so this is a friendly
-  scoreboard among people who can already open the artifact, not a tamper-proof ranking.
+- The board is **editors-only**. Access rules declared with the capability give the
+  leaderboard collection `write: "admin"`, so a viewer shared in at view/use level can
+  read the board and keep a profile but cannot post a score. Profiles stay writable by
+  any viewer so cross-device progress still works for everyone.
+- Among editors, writes are still last-writer-wins with no per-player enforcement.
 
 Data layout:
 
@@ -73,6 +76,21 @@ Data layout:
 players/<pid>       handle, salt, hash, iter, results, badges, xp, bestStreak
 leaderboard/<pid>   handle, score, modules, accuracy      (eligible players only)
 ```
+
+Access rules declared at publish:
+
+```js
+capabilities: { db: { rules: [
+  { path: "",            read: "view", write: "interact" },  // profiles: any viewer
+  { path: "leaderboard", read: "view", write: "admin"    }   // board: editors post
+] } }
+```
+
+This contract has no `user` capability, so the page cannot read the viewer's sharing
+level and cannot pre-emptively hide the post. Instead it attempts the write and treats an
+`invalid_argument` rejection as information: it marks the viewer a non-editor, explains
+the policy, and still shows their own standing below the cut. Nothing is reported as an
+error, because for a viewer this is the expected outcome, not a failure.
 
 Keeping the board in its own collection means the top-10 read needs no filter beside its
 `orderBy`, and never touches the records holding auth material. Profile writes use
