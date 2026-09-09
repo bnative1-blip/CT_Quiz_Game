@@ -656,5 +656,5 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 /* fan rotation on the schematic */
-.fan { animation: spin 2.4s linear infinite; }
+.fan { animation: spin 2.4s linear infinite; transform-origin: 0px 0px; }
 @keyframes spin { to { transform: rotate(360deg); } }
