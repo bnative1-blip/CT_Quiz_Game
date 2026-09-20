@@ -77,58 +77,7 @@
 
       <div class="tower-stage" role="img" aria-label="Schematic of an induced-draft cooling tower with plume, basin, hot return and cold supply piping">
         <canvas id="plume"></canvas>
-        <svg viewBox="0 0 400 340" fill="none" aria-hidden="true">
-          <!-- fan stack -->
-          <path d="M168 92h64v30h-64z" fill="var(--surface-3)" stroke="var(--line-2)" stroke-width="1.5"/>
-          <ellipse cx="200" cy="92" rx="32" ry="13" fill="var(--surface-2)" stroke="var(--line-2)" stroke-width="1.5"/>
-          <g transform="translate(200 92) scale(1 0.40625)">
-          <g class="fan" fill="var(--teal)">
-            <path d="M5.19 -1.49L6.86 -1.78L8.55 -1.94L10.27 -1.96L12 -1.84L13.74 -1.57L15.47 -1.14L17.19 -0.55L18.88 0.21L20.54 1.13L22.15 2.22L23.69 3.47L25.16 4.9L26.43 6.9L26.07 12.71L26.07 12.71L22.97 14.79L21.76 13.53L20.71 12.02L19.57 10.6L18.36 9.27L17.09 8.04L15.75 6.91L14.36 5.87L12.92 4.92L11.44 4.07L9.92 3.3L8.37 2.62L6.79 2.01L5.19 1.49Z"/>
-            <path d="M3.02 4.48L3.82 5.97L4.49 7.54L5.04 9.16L5.46 10.85L5.73 12.58L5.86 14.36L5.83 16.18L5.64 18.02L5.27 19.88L4.74 21.75L4.02 23.6L3.12 25.44L1.61 27.27L-4.04 28.72L-4.04 28.72L-6.97 26.41L-6.14 24.88L-5.03 23.41L-4.03 21.89L-3.14 20.33L-2.37 18.74L-1.7 17.12L-1.14 15.47L-0.69 13.81L-0.33 12.14L-0.07 10.46L0.1 8.77L0.19 7.08L0.19 5.4Z"/>
-            <path d="M-3.32 4.26L-4.5 5.47L-5.78 6.6L-7.16 7.62L-8.63 8.54L-10.2 9.34L-11.85 10.01L-13.59 10.55L-15.4 10.93L-17.28 11.16L-19.22 11.22L-21.21 11.11L-23.23 10.83L-25.44 9.96L-28.56 5.04L-28.56 5.04L-27.27 1.54L-25.56 1.84L-23.82 2.45L-22.06 2.93L-20.31 3.29L-18.55 3.54L-16.8 3.67L-15.07 3.69L-13.35 3.61L-11.65 3.43L-9.97 3.16L-8.31 2.8L-6.68 2.37L-5.07 1.85Z"/>
-            <path d="M-5.07 -1.85L-6.6 -2.59L-8.06 -3.46L-9.46 -4.45L-10.79 -5.57L-12.04 -6.81L-13.19 -8.18L-14.23 -9.66L-15.16 -11.27L-15.95 -12.99L-16.61 -14.81L-17.12 -16.73L-17.47 -18.75L-17.33 -21.11L-13.61 -25.61L-13.61 -25.61L-9.89 -25.46L-9.65 -23.74L-9.69 -21.89L-9.61 -20.08L-9.41 -18.29L-9.1 -16.55L-8.68 -14.85L-8.17 -13.19L-7.56 -11.58L-6.86 -10.02L-6.09 -8.5L-5.24 -7.04L-4.31 -5.62L-3.32 -4.26Z"/>
-            <path d="M0.19 -5.4L0.42 -7.07L0.8 -8.74L1.31 -10.38L1.96 -11.98L2.76 -13.55L3.7 -15.07L4.79 -16.52L6.03 -17.9L7.42 -19.19L8.95 -20.38L10.62 -21.46L12.43 -22.41L14.73 -23L20.15 -20.86L20.15 -20.86L21.16 -17.27L19.6 -16.52L17.83 -15.98L16.13 -15.34L14.49 -14.6L12.93 -13.77L11.44 -12.85L10.02 -11.84L8.68 -10.77L7.4 -9.62L6.21 -8.42L5.08 -7.15L4.01 -5.84L3.02 -4.48Z"/>
-          </g>
-          </g>
-          <circle cx="200" cy="92" r="4.6" fill="var(--surface-2)" stroke="var(--teal)" stroke-width="1.6"/>
-
-          <!-- tower shell -->
-          <path d="M124 122h152v112H124z" fill="var(--surface-2)" stroke="var(--line-2)" stroke-width="1.6"/>
-          <!-- fill pack -->
-          <path d="M136 150h128v58H136z" fill="var(--teal-soft)" stroke="var(--line)" stroke-width="1.2"/>
-          <path d="M136 158h128M136 168h128M136 178h128M136 188h128M136 198h128" stroke="var(--plume)" stroke-width="1" opacity=".55"/>
-          <!-- distribution header + nozzles -->
-          <path d="M136 140h128" stroke="var(--amber)" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M152 141v6M176 141v6M200 141v6M224 141v6M248 141v6" stroke="var(--amber)" stroke-width="1.6" stroke-linecap="round"/>
-          <!-- drift eliminators -->
-          <path d="M136 130l10 8M156 130l10 8M176 130l10 8M196 130l10 8M216 130l10 8M236 130l10 8M252 130l10 8" stroke="var(--ink-3)" stroke-width="1.2" opacity=".7"/>
-          <!-- air louvers -->
-          <path d="M124 216l14 8M124 226l14 8M262 216l14 8M262 226l14 8" stroke="var(--ink-3)" stroke-width="1.3"/>
-          <!-- basin -->
-          <path d="M112 234h176v22H112z" fill="var(--teal-soft)" stroke="var(--line-2)" stroke-width="1.6"/>
-          <path d="M112 242h176" stroke="var(--teal)" stroke-width="1.1" opacity=".65"/>
-          <!-- piping: hot return in, cold supply out -->
-          <path d="M62 140h62" stroke="var(--bad)" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M62 140v34" stroke="var(--bad)" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M112 250H62v-34" stroke="var(--teal)" stroke-width="2.6" stroke-linecap="round"/>
-          <circle cx="62" cy="195" r="13" fill="var(--surface)" stroke="var(--ink-3)" stroke-width="1.6"/>
-          <path d="M55 195h14M62 188v14" stroke="var(--ink-3)" stroke-width="1.4"/>
-          <!-- makeup + blowdown -->
-          <path d="M330 200h-42v46" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 4"/>
-          <path d="M288 256h44" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 4"/>
-          <!-- grade line -->
-          <path d="M40 268h320" stroke="var(--line-2)" stroke-width="1.4"/>
-          <!-- labels -->
-          <g font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing=".08em" fill="var(--ink-3)">
-            <text x="66" y="133">HOT RETURN</text>
-            <text x="66" y="286">COLD SUPPLY</text>
-            <text x="334" y="203">MAKEUP</text>
-            <text x="336" y="259">BLOWDOWN</text>
-            <text x="292" y="128">DRIFT ELIM.</text>
-            <text x="292" y="182">FILL</text>
-            <text x="240" y="96" fill="var(--teal)">FAN</text>
-          </g>
-        </svg>
+        <svg id="heroSvg" viewBox="0 0 400 340" fill="none" aria-hidden="true"></svg>
         <div class="stage-caption">Unit CT-1 &middot; induced draft, crossflow</div>
         <div class="stage-readout" aria-hidden="true">
           CYCLES <b id="rdCyc">5.2</b><br>
@@ -201,9 +150,67 @@
   </div>
 </section>
 
+<!-- ============ PRE-QUIZ BRIEF ============ -->
+<section class="view" id="view-ready" hidden>
+  <div class="wrap">
+    <div class="ready">
+      <span class="tag" id="rTag">CW-101</span>
+      <h1 class="ready-title">Before you start</h1>
+      <p class="ready-lede" id="rLede">
+        Five questions on this module. Here is exactly how the round runs.
+      </p>
+
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <div>
+            <h4>The question appears on its own</h4>
+            <p>You get <b>5 seconds</b> to read it before any answers are shown. No clock is
+               running yet, so read it properly.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <div>
+            <h4>Four answers appear</h4>
+            <p>You get <b>3 more seconds</b> to read them. The clock is still held. Answer during
+               this window and you keep the full speed bonus.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <div>
+            <h4>The residual clock starts draining</h4>
+            <p><b>20 seconds.</b> The bar is your free halogen residual. Answer faster and you
+               score more. At the halfway mark the tower starts to shake.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">4</span>
+          <div>
+            <h4>Wrong answers cost you hardware</h4>
+            <p>Every wrong answer shears a component off Unit CT-1 beside you. Four wrong and you
+               are on a Performance Improvement Plan. Five wrong and, well &mdash; don't.</p>
+          </div>
+        </li>
+      </ol>
+
+      <p class="ready-foot">
+        Keyboard: <b>A&ndash;D</b> or <b>1&ndash;4</b> to answer, <b>Enter</b> to advance.
+      </p>
+
+      <div class="hero-cta">
+        <button class="btn btn-ghost" id="rBack">Back to the briefing</button>
+        <button class="btn btn-primary" id="rGo">I'm ready &mdash; start the quiz</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ QUIZ ============ -->
 <section class="view" id="view-quiz" hidden>
   <div class="wrap">
+    <div class="quiz-grid">
     <div class="quiz">
       <div class="q-head">
         <span class="q-count mono" id="qCount">Question 1 of 5</span>
@@ -211,12 +218,25 @@
         <span class="tag" id="qTopic">CW-101</span>
         <span class="combo mono" id="qCombo">STREAK &times;1.0</span>
       </div>
+      <div class="phase" id="qPhase"></div>
       <div class="residual" id="residual" title="Free residual — answer before it runs out">
         <div class="residual-fill" id="residualFill"></div>
       </div>
       <h2 class="q-text" id="qText">Question</h2>
-      <div class="opts" id="qOpts"></div>
+      <div class="opts" id="qOpts" hidden></div>
       <div id="qVerdict"></div>
+    </div>
+
+    <aside class="rig">
+      <div class="rig-stage" id="rigStage">
+        <canvas id="rigFx"></canvas>
+        <svg id="rigSvg" viewBox="0 0 400 340" fill="none" aria-hidden="true"></svg>
+      </div>
+      <div class="rig-status" id="rigStatus">
+        <span class="rig-dot"></span><span id="rigText">Unit CT-1 &middot; nominal</span>
+      </div>
+      <ul class="rig-log" id="rigLog"></ul>
+    </aside>
     </div>
   </div>
 </section>
@@ -249,6 +269,52 @@
 </section>
 
 </main>
+
+<!-- ============ CATASTROPHIC FAILURE ============ -->
+<section class="view" id="view-collapse" hidden>
+  <div class="scene" id="scene">
+    <canvas id="scFx"></canvas>
+    <svg id="scSvg" viewBox="0 0 400 340" fill="none" aria-hidden="true"></svg>
+    <div class="scene-cap" id="scCap"></div>
+    <button class="chip scene-skip" id="scSkip">Skip</button>
+    <div class="scene-end" id="scEnd" hidden>
+      <p class="scene-kicker">Unit CT-1 &middot; total loss</p>
+      <h2>wow, it takes real talent to burn water!</h2>
+      <button class="btn btn-primary" id="scNext">See the damage report</button>
+    </div>
+  </div>
+</section>
+
+<dialog class="sheet notice" id="pipDlg" aria-labelledby="pipTitle">
+  <div class="notice-body">
+    <span class="notice-kicker">Human Resources &middot; automated notice</span>
+    <h3 id="pipTitle">You have been placed on a PIP</h3>
+    <p>
+      Four incorrect answers on <b id="pipMod">this module</b>. Effective immediately you are on a
+      <b>Performance Improvement Plan</b>. A 30-day improvement window starts today and your
+      supervisor has been copied.
+    </p>
+    <p class="notice-wink">No actual HR department was contacted. Get the next one right.</p>
+    <div class="sheet-foot">
+      <button class="btn btn-primary" id="pipOk">Acknowledge</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="sheet notice grave" id="hrDlg" aria-labelledby="hrTitle">
+  <div class="notice-body">
+    <span class="notice-kicker">Human Resources &middot; escalation</span>
+    <h3 id="hrTitle">An email has been sent to HR</h3>
+    <p>
+      Five for five. An email has been sent to HR and a meeting has been scheduled with your
+      supervisor for tomorrow morning. Please bring the module briefing.
+    </p>
+    <p class="notice-wink">Still no actual HR department. Your cooling tower, however, is having a very bad day.</p>
+    <div class="sheet-foot">
+      <button class="btn btn-primary" id="hrOk">I understand</button>
+    </div>
+  </div>
+</dialog>
 
 <dialog class="sheet" id="authDlg" aria-labelledby="authTitle">
   <form id="authForm">
@@ -288,6 +354,7 @@
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script src="js/topics.js"></script>
+<script src="js/scene.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

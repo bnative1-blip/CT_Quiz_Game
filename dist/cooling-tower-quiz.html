@@ -98,6 +98,10 @@
 /* ---------- Base ---------- */
 * { box-sizing: border-box; }
 
+/* The artifact host ships this in its own reset; the standalone file needs it
+   too, or any `display:` rule silently defeats the hidden attribute. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--ground);
@@ -744,6 +748,194 @@ button { font: inherit; color: inherit; cursor: pointer; }
   color: var(--ink-3); line-height: 1.7;
 }
 
+/* ---------- Pre-quiz brief ---------- */
+.ready { max-width: 660px; margin: 0 auto; padding-top: 42px; }
+.ready-title { font-size: clamp(30px, 4.4vw, 42px); letter-spacing: -.03em; margin: 10px 0 12px; }
+.ready-lede { font-size: 17.5px; color: var(--ink-2); margin: 0 0 28px; }
+.steps { list-style: none; margin: 0 0 26px; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.steps li {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+.steps li:last-child { border-bottom: 1px solid var(--line); }
+.step-n {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  width: 24px; height: 24px; flex: none;
+  border: 1px solid var(--amber); color: var(--amber);
+  border-radius: 50%; display: grid; place-items: center;
+  margin-top: 1px;
+}
+.steps h4 { font-size: 16px; letter-spacing: -.01em; margin-bottom: 3px; }
+.steps p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.steps b { color: var(--ink); font-weight: 600; }
+.ready-foot {
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3);
+  margin: 0 0 24px;
+}
+.ready-foot b { color: var(--ink-2); font-weight: 500; }
+
+/* ---------- Quiz layout with the damage rig ---------- */
+.quiz-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 40px;
+  align-items: start;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.quiz-grid .quiz { max-width: none; margin: 0; }
+
+.rig { position: sticky; top: 82px; display: flex; flex-direction: column; gap: 10px; padding-top: 30px; }
+.rig-stage {
+  position: relative;
+  aspect-ratio: 4 / 3.4;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: linear-gradient(to bottom, var(--surface-2), var(--surface));
+  overflow: hidden;
+}
+.rig-stage canvas, .rig-stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* shake builds once the residual is past halfway */
+.rig-stage.shake svg { animation: rumble .18s linear infinite; }
+.rig-stage.shake-hard svg { animation: rumble .1s linear infinite; }
+@keyframes rumble {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(-1.1px, .6px) rotate(-.22deg); }
+  50%  { transform: translate(.9px, -.7px) rotate(.18deg); }
+  75%  { transform: translate(-.7px, -.4px) rotate(.12deg); }
+}
+
+.rig-status {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.rig-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); flex: none; }
+.rig-status[data-level="warn"] .rig-dot { background: var(--amber); }
+.rig-status[data-level="bad"]  .rig-dot { background: var(--bad); }
+.rig-status[data-level="bad"]  { color: var(--bad); }
+.rig-status[data-level="warn"] { color: var(--amber); }
+
+.rig-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.rig-log li {
+  font-family: var(--font-mono); font-size: 10.5px; line-height: 1.45;
+  color: var(--bad);
+  padding-left: 13px; position: relative;
+  animation: rise .35s cubic-bezier(.2,.8,.25,1) backwards;
+}
+.rig-log li::before { content: "\2716"; position: absolute; left: 0; top: 0; font-size: 8px; }
+
+/* a sheared component tumbles away */
+.part { transform-origin: 50% 50%; transform-box: fill-box; }
+.part.shed { animation: shear 1.15s cubic-bezier(.35,0,.85,1) forwards; }
+@keyframes shear {
+  0%   { transform: translate(0,0) rotate(0deg); opacity: 1; }
+  15%  { transform: translate(2px,-4px) rotate(-5deg); opacity: 1; }
+  100% { transform: translate(26px,150px) rotate(82deg); opacity: 0; }
+}
+.part.gone { opacity: 0; }
+
+/* ---------- Collapse scene ---------- */
+.scene {
+  position: relative;
+  max-width: 900px;
+  margin: 24px auto 0;
+  aspect-ratio: 4 / 3.1;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: linear-gradient(to bottom, var(--surface-2) 0%, var(--surface) 62%, var(--surface-3) 100%);
+}
+.scene canvas, .scene svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scene.quake { animation: quake .28s linear 3; }
+@keyframes quake {
+  0%,100% { transform: translate(0,0); }
+  20% { transform: translate(-6px, 3px); }
+  40% { transform: translate(5px, -4px); }
+  60% { transform: translate(-4px, -2px); }
+  80% { transform: translate(3px, 3px); }
+}
+#scSvg #sc-root {
+  transform-origin: 200px 268px;
+  transform-box: view-box;
+  transition: transform 4.6s cubic-bezier(.62,.02,.82,1);
+}
+#scSvg.fell #sc-root { transform: translate(-42px, -85px) rotate(82deg); }
+
+.scene-cap {
+  position: absolute; left: 0; right: 0; top: 16px;
+  text-align: center;
+  font-family: var(--font-mono); font-size: 11.5px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--bad);
+  opacity: 0; transition: opacity .5s;
+}
+.scene-cap.on { opacity: 1; }
+.scene-skip {
+  position: absolute; right: 12px; top: 12px; z-index: 3;
+  background: var(--surface); opacity: .8;
+}
+.scene-end {
+  position: absolute; inset: 0; z-index: 4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; padding: 24px; text-align: center;
+  background: color-mix(in srgb, var(--ground) 72%, transparent);
+  backdrop-filter: blur(3px);
+  animation: rise .7s cubic-bezier(.2,.8,.25,1) backwards;
+}
+.scene-kicker {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--bad);
+  margin: 0;
+}
+.scene-end h2 {
+  font-size: clamp(26px, 4.6vw, 46px);
+  letter-spacing: -.03em;
+  max-width: 16ch;
+  color: var(--amber);
+}
+
+/* ---------- HR notices ---------- */
+.sheet.notice { max-width: 460px; }
+.notice-body { padding: 24px 26px 20px; display: flex; flex-direction: column; gap: 12px; }
+.notice-kicker {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--amber);
+}
+.sheet.grave .notice-kicker { color: var(--bad); }
+.notice-body h3 { font-size: 22px; letter-spacing: -.022em; }
+.notice-body p { margin: 0; font-size: 15.5px; line-height: 1.6; color: var(--ink-2); }
+.notice-body p b { color: var(--ink); font-weight: 600; }
+.notice-wink {
+  font-family: var(--font-mono);
+  font-size: 11px !important; line-height: 1.6 !important;
+  color: var(--ink-3) !important;
+  border-left: 2px solid var(--line-2); padding-left: 11px;
+}
+
+/* ---------- Question phase cue ---------- */
+.phase {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-3);
+  min-height: 16px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.phase b { color: var(--amber); font-weight: 600; font-variant-numeric: tabular-nums; }
+.residual.held .residual-fill { background: var(--line-2); }
+
+@media (max-width: 900px) {
+  .quiz-grid { grid-template-columns: 1fr; gap: 20px; }
+  .rig { position: static; flex-direction: row; align-items: center; gap: 14px; padding-top: 18px; }
+  .rig-stage { width: 150px; flex: none; }
+  .rig-log { flex: 1; }
+}
+
 /* ---------- Motion ---------- */
 .stagger > * { animation: rise .5s cubic-bezier(.2,.8,.25,1) backwards; }
 @keyframes rise { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
@@ -844,58 +1036,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
       <div class="tower-stage" role="img" aria-label="Schematic of an induced-draft cooling tower with plume, basin, hot return and cold supply piping">
         <canvas id="plume"></canvas>
-        <svg viewBox="0 0 400 340" fill="none" aria-hidden="true">
-          <!-- fan stack -->
-          <path d="M168 92h64v30h-64z" fill="var(--surface-3)" stroke="var(--line-2)" stroke-width="1.5"/>
-          <ellipse cx="200" cy="92" rx="32" ry="13" fill="var(--surface-2)" stroke="var(--line-2)" stroke-width="1.5"/>
-          <g transform="translate(200 92) scale(1 0.40625)">
-          <g class="fan" fill="var(--teal)">
-            <path d="M5.19 -1.49L6.86 -1.78L8.55 -1.94L10.27 -1.96L12 -1.84L13.74 -1.57L15.47 -1.14L17.19 -0.55L18.88 0.21L20.54 1.13L22.15 2.22L23.69 3.47L25.16 4.9L26.43 6.9L26.07 12.71L26.07 12.71L22.97 14.79L21.76 13.53L20.71 12.02L19.57 10.6L18.36 9.27L17.09 8.04L15.75 6.91L14.36 5.87L12.92 4.92L11.44 4.07L9.92 3.3L8.37 2.62L6.79 2.01L5.19 1.49Z"/>
-            <path d="M3.02 4.48L3.82 5.97L4.49 7.54L5.04 9.16L5.46 10.85L5.73 12.58L5.86 14.36L5.83 16.18L5.64 18.02L5.27 19.88L4.74 21.75L4.02 23.6L3.12 25.44L1.61 27.27L-4.04 28.72L-4.04 28.72L-6.97 26.41L-6.14 24.88L-5.03 23.41L-4.03 21.89L-3.14 20.33L-2.37 18.74L-1.7 17.12L-1.14 15.47L-0.69 13.81L-0.33 12.14L-0.07 10.46L0.1 8.77L0.19 7.08L0.19 5.4Z"/>
-            <path d="M-3.32 4.26L-4.5 5.47L-5.78 6.6L-7.16 7.62L-8.63 8.54L-10.2 9.34L-11.85 10.01L-13.59 10.55L-15.4 10.93L-17.28 11.16L-19.22 11.22L-21.21 11.11L-23.23 10.83L-25.44 9.96L-28.56 5.04L-28.56 5.04L-27.27 1.54L-25.56 1.84L-23.82 2.45L-22.06 2.93L-20.31 3.29L-18.55 3.54L-16.8 3.67L-15.07 3.69L-13.35 3.61L-11.65 3.43L-9.97 3.16L-8.31 2.8L-6.68 2.37L-5.07 1.85Z"/>
-            <path d="M-5.07 -1.85L-6.6 -2.59L-8.06 -3.46L-9.46 -4.45L-10.79 -5.57L-12.04 -6.81L-13.19 -8.18L-14.23 -9.66L-15.16 -11.27L-15.95 -12.99L-16.61 -14.81L-17.12 -16.73L-17.47 -18.75L-17.33 -21.11L-13.61 -25.61L-13.61 -25.61L-9.89 -25.46L-9.65 -23.74L-9.69 -21.89L-9.61 -20.08L-9.41 -18.29L-9.1 -16.55L-8.68 -14.85L-8.17 -13.19L-7.56 -11.58L-6.86 -10.02L-6.09 -8.5L-5.24 -7.04L-4.31 -5.62L-3.32 -4.26Z"/>
-            <path d="M0.19 -5.4L0.42 -7.07L0.8 -8.74L1.31 -10.38L1.96 -11.98L2.76 -13.55L3.7 -15.07L4.79 -16.52L6.03 -17.9L7.42 -19.19L8.95 -20.38L10.62 -21.46L12.43 -22.41L14.73 -23L20.15 -20.86L20.15 -20.86L21.16 -17.27L19.6 -16.52L17.83 -15.98L16.13 -15.34L14.49 -14.6L12.93 -13.77L11.44 -12.85L10.02 -11.84L8.68 -10.77L7.4 -9.62L6.21 -8.42L5.08 -7.15L4.01 -5.84L3.02 -4.48Z"/>
-          </g>
-          </g>
-          <circle cx="200" cy="92" r="4.6" fill="var(--surface-2)" stroke="var(--teal)" stroke-width="1.6"/>
-
-          <!-- tower shell -->
-          <path d="M124 122h152v112H124z" fill="var(--surface-2)" stroke="var(--line-2)" stroke-width="1.6"/>
-          <!-- fill pack -->
-          <path d="M136 150h128v58H136z" fill="var(--teal-soft)" stroke="var(--line)" stroke-width="1.2"/>
-          <path d="M136 158h128M136 168h128M136 178h128M136 188h128M136 198h128" stroke="var(--plume)" stroke-width="1" opacity=".55"/>
-          <!-- distribution header + nozzles -->
-          <path d="M136 140h128" stroke="var(--amber)" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M152 141v6M176 141v6M200 141v6M224 141v6M248 141v6" stroke="var(--amber)" stroke-width="1.6" stroke-linecap="round"/>
-          <!-- drift eliminators -->
-          <path d="M136 130l10 8M156 130l10 8M176 130l10 8M196 130l10 8M216 130l10 8M236 130l10 8M252 130l10 8" stroke="var(--ink-3)" stroke-width="1.2" opacity=".7"/>
-          <!-- air louvers -->
-          <path d="M124 216l14 8M124 226l14 8M262 216l14 8M262 226l14 8" stroke="var(--ink-3)" stroke-width="1.3"/>
-          <!-- basin -->
-          <path d="M112 234h176v22H112z" fill="var(--teal-soft)" stroke="var(--line-2)" stroke-width="1.6"/>
-          <path d="M112 242h176" stroke="var(--teal)" stroke-width="1.1" opacity=".65"/>
-          <!-- piping: hot return in, cold supply out -->
-          <path d="M62 140h62" stroke="var(--bad)" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M62 140v34" stroke="var(--bad)" stroke-width="2.6" stroke-linecap="round"/>
-          <path d="M112 250H62v-34" stroke="var(--teal)" stroke-width="2.6" stroke-linecap="round"/>
-          <circle cx="62" cy="195" r="13" fill="var(--surface)" stroke="var(--ink-3)" stroke-width="1.6"/>
-          <path d="M55 195h14M62 188v14" stroke="var(--ink-3)" stroke-width="1.4"/>
-          <!-- makeup + blowdown -->
-          <path d="M330 200h-42v46" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 4"/>
-          <path d="M288 256h44" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 4"/>
-          <!-- grade line -->
-          <path d="M40 268h320" stroke="var(--line-2)" stroke-width="1.4"/>
-          <!-- labels -->
-          <g font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing=".08em" fill="var(--ink-3)">
-            <text x="66" y="133">HOT RETURN</text>
-            <text x="66" y="286">COLD SUPPLY</text>
-            <text x="334" y="203">MAKEUP</text>
-            <text x="336" y="259">BLOWDOWN</text>
-            <text x="292" y="128">DRIFT ELIM.</text>
-            <text x="292" y="182">FILL</text>
-            <text x="240" y="96" fill="var(--teal)">FAN</text>
-          </g>
-        </svg>
+        <svg id="heroSvg" viewBox="0 0 400 340" fill="none" aria-hidden="true"></svg>
         <div class="stage-caption">Unit CT-1 &middot; induced draft, crossflow</div>
         <div class="stage-readout" aria-hidden="true">
           CYCLES <b id="rdCyc">5.2</b><br>
@@ -968,9 +1109,67 @@ button { font: inherit; color: inherit; cursor: pointer; }
   </div>
 </section>
 
+<!-- ============ PRE-QUIZ BRIEF ============ -->
+<section class="view" id="view-ready" hidden>
+  <div class="wrap">
+    <div class="ready">
+      <span class="tag" id="rTag">CW-101</span>
+      <h1 class="ready-title">Before you start</h1>
+      <p class="ready-lede" id="rLede">
+        Five questions on this module. Here is exactly how the round runs.
+      </p>
+
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <div>
+            <h4>The question appears on its own</h4>
+            <p>You get <b>5 seconds</b> to read it before any answers are shown. No clock is
+               running yet, so read it properly.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <div>
+            <h4>Four answers appear</h4>
+            <p>You get <b>3 more seconds</b> to read them. The clock is still held. Answer during
+               this window and you keep the full speed bonus.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <div>
+            <h4>The residual clock starts draining</h4>
+            <p><b>20 seconds.</b> The bar is your free halogen residual. Answer faster and you
+               score more. At the halfway mark the tower starts to shake.</p>
+          </div>
+        </li>
+        <li>
+          <span class="step-n">4</span>
+          <div>
+            <h4>Wrong answers cost you hardware</h4>
+            <p>Every wrong answer shears a component off Unit CT-1 beside you. Four wrong and you
+               are on a Performance Improvement Plan. Five wrong and, well &mdash; don't.</p>
+          </div>
+        </li>
+      </ol>
+
+      <p class="ready-foot">
+        Keyboard: <b>A&ndash;D</b> or <b>1&ndash;4</b> to answer, <b>Enter</b> to advance.
+      </p>
+
+      <div class="hero-cta">
+        <button class="btn btn-ghost" id="rBack">Back to the briefing</button>
+        <button class="btn btn-primary" id="rGo">I'm ready &mdash; start the quiz</button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============ QUIZ ============ -->
 <section class="view" id="view-quiz" hidden>
   <div class="wrap">
+    <div class="quiz-grid">
     <div class="quiz">
       <div class="q-head">
         <span class="q-count mono" id="qCount">Question 1 of 5</span>
@@ -978,12 +1177,25 @@ button { font: inherit; color: inherit; cursor: pointer; }
         <span class="tag" id="qTopic">CW-101</span>
         <span class="combo mono" id="qCombo">STREAK &times;1.0</span>
       </div>
+      <div class="phase" id="qPhase"></div>
       <div class="residual" id="residual" title="Free residual — answer before it runs out">
         <div class="residual-fill" id="residualFill"></div>
       </div>
       <h2 class="q-text" id="qText">Question</h2>
-      <div class="opts" id="qOpts"></div>
+      <div class="opts" id="qOpts" hidden></div>
       <div id="qVerdict"></div>
+    </div>
+
+    <aside class="rig">
+      <div class="rig-stage" id="rigStage">
+        <canvas id="rigFx"></canvas>
+        <svg id="rigSvg" viewBox="0 0 400 340" fill="none" aria-hidden="true"></svg>
+      </div>
+      <div class="rig-status" id="rigStatus">
+        <span class="rig-dot"></span><span id="rigText">Unit CT-1 &middot; nominal</span>
+      </div>
+      <ul class="rig-log" id="rigLog"></ul>
+    </aside>
     </div>
   </div>
 </section>
@@ -1016,6 +1228,52 @@ button { font: inherit; color: inherit; cursor: pointer; }
 </section>
 
 </main>
+
+<!-- ============ CATASTROPHIC FAILURE ============ -->
+<section class="view" id="view-collapse" hidden>
+  <div class="scene" id="scene">
+    <canvas id="scFx"></canvas>
+    <svg id="scSvg" viewBox="0 0 400 340" fill="none" aria-hidden="true"></svg>
+    <div class="scene-cap" id="scCap"></div>
+    <button class="chip scene-skip" id="scSkip">Skip</button>
+    <div class="scene-end" id="scEnd" hidden>
+      <p class="scene-kicker">Unit CT-1 &middot; total loss</p>
+      <h2>wow, it takes real talent to burn water!</h2>
+      <button class="btn btn-primary" id="scNext">See the damage report</button>
+    </div>
+  </div>
+</section>
+
+<dialog class="sheet notice" id="pipDlg" aria-labelledby="pipTitle">
+  <div class="notice-body">
+    <span class="notice-kicker">Human Resources &middot; automated notice</span>
+    <h3 id="pipTitle">You have been placed on a PIP</h3>
+    <p>
+      Four incorrect answers on <b id="pipMod">this module</b>. Effective immediately you are on a
+      <b>Performance Improvement Plan</b>. A 30-day improvement window starts today and your
+      supervisor has been copied.
+    </p>
+    <p class="notice-wink">No actual HR department was contacted. Get the next one right.</p>
+    <div class="sheet-foot">
+      <button class="btn btn-primary" id="pipOk">Acknowledge</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="sheet notice grave" id="hrDlg" aria-labelledby="hrTitle">
+  <div class="notice-body">
+    <span class="notice-kicker">Human Resources &middot; escalation</span>
+    <h3 id="hrTitle">An email has been sent to HR</h3>
+    <p>
+      Five for five. An email has been sent to HR and a meeting has been scheduled with your
+      supervisor for tomorrow morning. Please bring the module briefing.
+    </p>
+    <p class="notice-wink">Still no actual HR department. Your cooling tower, however, is having a very bad day.</p>
+    <div class="sheet-foot">
+      <button class="btn btn-primary" id="hrOk">I understand</button>
+    </div>
+  </div>
+</dialog>
 
 <dialog class="sheet" id="authDlg" aria-labelledby="authTitle">
   <form id="authForm">
@@ -1852,11 +2110,276 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
 </script>
 <script>
 /* ============================================================
+   Shared cooling tower artwork + particle effects
+   ------------------------------------------------------------
+   One tower definition drives three places: the hero schematic,
+   the damage rig beside the quiz, and the collapse scene. Parts
+   carry prefixed ids so a rig can lose pieces independently.
+   ============================================================ */
+
+/* Five equally spaced, swept, tapered fan blades, drawn as a true
+   circular fan in a space the parent group foreshortens. */
+var FAN_BLADES = [
+  "M5.19 -1.49L6.86 -1.78L8.55 -1.94L10.27 -1.96L12 -1.84L13.74 -1.57L15.47 -1.14L17.19 -0.55L18.88 0.21L20.54 1.13L22.15 2.22L23.69 3.47L25.16 4.9L26.43 6.9L26.07 12.71L26.07 12.71L22.97 14.79L21.76 13.53L20.71 12.02L19.57 10.6L18.36 9.27L17.09 8.04L15.75 6.91L14.36 5.87L12.92 4.92L11.44 4.07L9.92 3.3L8.37 2.62L6.79 2.01L5.19 1.49Z",
+  "M3.02 4.48L3.82 5.97L4.49 7.54L5.04 9.16L5.46 10.85L5.73 12.58L5.86 14.36L5.83 16.18L5.64 18.02L5.27 19.88L4.74 21.75L4.02 23.6L3.12 25.44L1.61 27.27L-4.04 28.72L-4.04 28.72L-6.97 26.41L-6.14 24.88L-5.03 23.41L-4.03 21.89L-3.14 20.33L-2.37 18.74L-1.7 17.12L-1.14 15.47L-0.69 13.81L-0.33 12.14L-0.07 10.46L0.1 8.77L0.19 7.08L0.19 5.4Z",
+  "M-3.32 4.26L-4.5 5.47L-5.78 6.6L-7.16 7.62L-8.63 8.54L-10.2 9.34L-11.85 10.01L-13.59 10.55L-15.4 10.93L-17.28 11.16L-19.22 11.22L-21.21 11.11L-23.23 10.83L-25.44 9.96L-28.56 5.04L-28.56 5.04L-27.27 1.54L-25.56 1.84L-23.82 2.45L-22.06 2.93L-20.31 3.29L-18.55 3.54L-16.8 3.67L-15.07 3.69L-13.35 3.61L-11.65 3.43L-9.97 3.16L-8.31 2.8L-6.68 2.37L-5.07 1.85Z",
+  "M-5.07 -1.85L-6.6 -2.59L-8.06 -3.46L-9.46 -4.45L-10.79 -5.57L-12.04 -6.81L-13.19 -8.18L-14.23 -9.66L-15.16 -11.27L-15.95 -12.99L-16.61 -14.81L-17.12 -16.73L-17.47 -18.75L-17.33 -21.11L-13.61 -25.61L-13.61 -25.61L-9.89 -25.46L-9.65 -23.74L-9.69 -21.89L-9.61 -20.08L-9.41 -18.29L-9.1 -16.55L-8.68 -14.85L-8.17 -13.19L-7.56 -11.58L-6.86 -10.02L-6.09 -8.5L-5.24 -7.04L-4.31 -5.62L-3.32 -4.26Z",
+  "M0.19 -5.4L0.42 -7.07L0.8 -8.74L1.31 -10.38L1.96 -11.98L2.76 -13.55L3.7 -15.07L4.79 -16.52L6.03 -17.9L7.42 -19.19L8.95 -20.38L10.62 -21.46L12.43 -22.41L14.73 -23L20.15 -20.86L20.15 -20.86L21.16 -17.27L19.6 -16.52L17.83 -15.98L16.13 -15.34L14.49 -14.6L12.93 -13.77L11.44 -12.85L10.02 -11.84L8.68 -10.77L7.4 -9.62L6.21 -8.42L5.08 -7.15L4.01 -5.84L3.02 -4.48Z"
+];
+
+/* Where each breakable part sits, as a fraction of the 400x340 viewBox,
+   so the particle layer can throw dust at the right spot. */
+var TOWER_PARTS = [
+  { id: "fan",    at: [0.50, 0.29], label: "Fan and stack" },
+  { id: "drift",  at: [0.50, 0.39], label: "Drift eliminators" },
+  { id: "header", at: [0.50, 0.42], label: "Distribution header" },
+  { id: "fill",   at: [0.50, 0.53], label: "Fill pack" },
+  { id: "louver", at: [0.34, 0.66], label: "Air louvers" }
+];
+
+function towerMarkup(pre, opts) {
+  opts = opts || {};
+  var blades = FAN_BLADES.map(function (d) { return '<path d="' + d + '"/>'; }).join("");
+
+  var labels = opts.labels ? (
+    '<g font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing=".08em" fill="var(--ink-3)">' +
+      '<text x="66" y="133">HOT RETURN</text>' +
+      '<text x="66" y="286">COLD SUPPLY</text>' +
+      '<text x="334" y="203">MAKEUP</text>' +
+      '<text x="336" y="259">BLOWDOWN</text>' +
+      '<text x="292" y="128">DRIFT ELIM.</text>' +
+      '<text x="292" y="182">FILL</text>' +
+      '<text x="240" y="96" fill="var(--teal)">FAN</text>' +
+    '</g>') : "";
+
+  return '' +
+  '<g id="' + pre + '-root">' +
+    // fan stack
+    '<g id="' + pre + '-fan" class="part">' +
+      '<path d="M168 92h64v30h-64z" fill="var(--surface-3)" stroke="var(--line-2)" stroke-width="1.5"/>' +
+      '<ellipse cx="200" cy="92" rx="32" ry="13" fill="var(--surface-2)" stroke="var(--line-2)" stroke-width="1.5"/>' +
+      '<g transform="translate(200 92) scale(1 0.40625)">' +
+        '<g class="fan" fill="var(--teal)">' + blades + '</g>' +
+      '</g>' +
+      '<circle cx="200" cy="92" r="4.6" fill="var(--surface-2)" stroke="var(--teal)" stroke-width="1.6"/>' +
+    '</g>' +
+    // shell
+    '<path d="M124 122h152v112H124z" fill="var(--surface-2)" stroke="var(--line-2)" stroke-width="1.6"/>' +
+    // fill pack
+    '<g id="' + pre + '-fill" class="part">' +
+      '<path d="M136 150h128v58H136z" fill="var(--teal-soft)" stroke="var(--line)" stroke-width="1.2"/>' +
+      '<path d="M136 158h128M136 168h128M136 178h128M136 188h128M136 198h128" stroke="var(--plume)" stroke-width="1" opacity=".55"/>' +
+    '</g>' +
+    // distribution header + nozzles
+    '<g id="' + pre + '-header" class="part">' +
+      '<path d="M136 140h128" stroke="var(--amber)" stroke-width="2.6" stroke-linecap="round"/>' +
+      '<path d="M152 141v6M176 141v6M200 141v6M224 141v6M248 141v6" stroke="var(--amber)" stroke-width="1.6" stroke-linecap="round"/>' +
+    '</g>' +
+    // drift eliminators
+    '<g id="' + pre + '-drift" class="part">' +
+      '<path d="M136 130l10 8M156 130l10 8M176 130l10 8M196 130l10 8M216 130l10 8M236 130l10 8M252 130l10 8" stroke="var(--ink-3)" stroke-width="1.2" opacity=".7"/>' +
+    '</g>' +
+    // air louvers
+    '<g id="' + pre + '-louver" class="part">' +
+      '<path d="M124 216l14 8M124 226l14 8M262 216l14 8M262 226l14 8" stroke="var(--ink-3)" stroke-width="1.3"/>' +
+    '</g>' +
+    // basin
+    '<path d="M112 234h176v22H112z" fill="var(--teal-soft)" stroke="var(--line-2)" stroke-width="1.6"/>' +
+    '<path d="M112 242h176" stroke="var(--teal)" stroke-width="1.1" opacity=".65"/>' +
+    labels +
+  '</g>' +
+    // pipework stays in the ground when the tower goes over
+    '<path d="M62 140h62" stroke="var(--bad)" stroke-width="2.6" stroke-linecap="round"/>' +
+    '<path d="M62 140v34" stroke="var(--bad)" stroke-width="2.6" stroke-linecap="round"/>' +
+    '<path d="M112 250H62v-34" stroke="var(--teal)" stroke-width="2.6" stroke-linecap="round"/>' +
+    '<circle cx="62" cy="195" r="13" fill="var(--surface)" stroke="var(--ink-3)" stroke-width="1.6"/>' +
+    '<path d="M55 195h14M62 188v14" stroke="var(--ink-3)" stroke-width="1.4"/>' +
+    '<path d="M330 200h-42v46" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 4"/>' +
+    '<path d="M288 256h44" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 4"/>' +
+  // grade stays put while the tower falls
+  '<path d="M40 268h320" stroke="var(--line-2)" stroke-width="1.4"/>';
+}
+
+/* ------------------------------------------------------------
+   Particle layer: vapor plume, dust, smoke and fire on one canvas.
+   ------------------------------------------------------------ */
+
+function Fx(canvas) {
+  this.cv = canvas;
+  this.ctx = canvas.getContext("2d");
+  this.parts = [];
+  this.W = 0; this.H = 0;
+  this.vapor = true;          // steady plume from the fan stack
+  this.vaporAt = [0.5, 0.271];
+  this.fires = [];            // [{x, y, power}]
+  this.raf = null;
+  this.last = 0;
+  this.reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var self = this;
+  this._onResize = function () { self.size(); };
+  window.addEventListener("resize", this._onResize);
+  this.size();
+}
+
+Fx.PALETTE = {
+  vapor: { css: "--plume", a: 0.13, grow: 1.012, fade: 0.011 },
+  dust:  { hex: "#A2988C", a: 0.15, grow: 1.013, fade: 0.017 },
+  smoke: { hex: "#5C574F", a: 0.15, grow: 1.018, fade: 0.008 },
+  fire:  { hex: "#F5A623", a: 0.46, grow: 0.990, fade: 0.028 },
+  ember: { hex: "#DC4A18", a: 0.48, grow: 0.984, fade: 0.023 }
+};
+
+Fx.prototype.size = function () {
+  var r = this.cv.getBoundingClientRect();
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  this.W = r.width; this.H = r.height;
+  this.cv.width = Math.max(1, Math.round(r.width * dpr));
+  this.cv.height = Math.max(1, Math.round(r.height * dpr));
+  this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+};
+
+Fx.prototype.add = function (nx, ny, kind, o) {
+  o = o || {};
+  if (!this.W) this.size();
+  this.parts.push({
+    kind: kind,
+    x: this.W * nx + (Math.random() - 0.5) * (o.spread || 0.06) * this.W,
+    y: this.H * ny + (Math.random() - 0.5) * (o.spread || 0.06) * this.H * 0.5,
+    r: this.W * (o.r || 0.03) * (0.6 + Math.random() * 0.8),
+    vx: (o.vx === undefined ? 0.04 : o.vx) + (Math.random() - 0.5) * (o.jx || 0.5),
+    vy: (o.vy === undefined ? -0.25 : o.vy) + (Math.random() - 0.5) * (o.jy || 0.3),
+    g: o.g || 0,
+    life: 1
+  });
+};
+
+/* A puff of debris at a point, for a part shearing off. */
+Fx.prototype.burst = function (nx, ny, n, kind) {
+  for (var i = 0; i < n; i++) {
+    this.add(nx, ny, kind || "dust", {
+      r: 0.016, spread: 0.05,
+      vx: (Math.random() - 0.5) * 1.6,
+      vy: -0.1 - Math.random() * 0.7,
+      jx: 0.8, jy: 0.5, g: 0.012
+    });
+  }
+};
+
+/* A wide ground-hugging dust cloud, for the impact. */
+Fx.prototype.ground = function (nx, ny, n) {
+  for (var i = 0; i < n; i++) {
+    var dir = Math.random() < 0.5 ? -1 : 1;
+    this.add(nx, ny, "dust", {
+      r: 0.032, spread: 0.34,
+      vx: dir * (0.4 + Math.random() * 1.9),
+      vy: -0.05 - Math.random() * 0.45,
+      jx: 0.3, jy: 0.2, g: 0.004
+    });
+  }
+};
+
+Fx.prototype.ignite = function (nx, ny, power) {
+  this.fires.push({ x: nx, y: ny, power: power || 0.2 });
+};
+
+Fx.prototype.stoke = function (delta) {
+  this.fires.forEach(function (f) { f.power = Math.min(1, f.power + delta); });
+};
+
+Fx.prototype.clear = function () {
+  this.parts.length = 0;
+  this.fires.length = 0;
+};
+
+Fx.prototype.rgba = function (kind, a) {
+  var p = Fx.PALETTE[kind];
+  var hex = p.hex;
+  if (p.css) {
+    hex = getComputedStyle(document.documentElement).getPropertyValue(p.css).trim() || "#9AB";
+  }
+  var h = hex.replace("#", "");
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  var n = parseInt(h, 16);
+  return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a.toFixed(3) + ")";
+};
+
+Fx.prototype.step = function () {
+  var ctx = this.ctx, i, p, spec;
+
+  if (this.vapor && this.parts.length < 40 && Math.random() < 0.6) {
+    this.add(this.vaporAt[0], this.vaporAt[1], "vapor",
+      { r: 0.035, spread: 0.10, vx: 0.03 + Math.random() * 0.09, vy: -(0.22 + Math.random() * 0.24) });
+  }
+
+  for (i = 0; i < this.fires.length; i++) {
+    var f = this.fires[i];
+    var n = 1 + Math.round(f.power * 4);   // always at least one flame
+    for (var k = 0; k < n; k++) {
+      this.add(f.x, f.y, Math.random() < 0.55 ? "fire" : "ember", {
+        r: 0.014 + f.power * 0.016, spread: 0.035 * (0.5 + f.power),
+        vx: (Math.random() - 0.5) * 0.34,
+        vy: -(0.9 + Math.random() * 1.5) * (0.6 + f.power),
+        jx: 0.18, jy: 0.4
+      });
+    }
+    if (Math.random() < f.power * 0.5) {
+      this.add(f.x, f.y - 0.08, "smoke", {
+        r: 0.05 + f.power * 0.04, spread: 0.10,
+        vx: (Math.random() - 0.3) * 0.5, vy: -(0.3 + Math.random() * 0.6), jx: 0.3, jy: 0.3
+      });
+    }
+  }
+
+  ctx.clearRect(0, 0, this.W, this.H);
+
+  for (i = this.parts.length - 1; i >= 0; i--) {
+    p = this.parts[i];
+    spec = Fx.PALETTE[p.kind];
+    p.vy += p.g;
+    p.x += p.vx; p.y += p.vy;
+    p.r *= spec.grow;
+    p.life -= spec.fade;
+    if (p.life <= 0 || p.r < 0.4 || p.y - p.r > this.H + 40) { this.parts.splice(i, 1); continue; }
+    var g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+    g.addColorStop(0, this.rgba(p.kind, spec.a * p.life));
+    g.addColorStop(1, this.rgba(p.kind, 0));
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+};
+
+Fx.prototype.start = function () {
+  if (this.raf) return;
+  var self = this;
+  this.raf = requestAnimationFrame(function loop(now) {
+    self.raf = requestAnimationFrame(loop);
+    if (now - self.last < 32) return;     // ~30fps is plenty for vapor and dust
+    self.last = now;
+    self.step();
+  });
+};
+
+Fx.prototype.stop = function () {
+  if (this.raf) { cancelAnimationFrame(this.raf); this.raf = null; }
+};
+
+Fx.prototype.destroy = function () {
+  this.stop();
+  window.removeEventListener("resize", this._onResize);
+};
+
+</script>
+<script>
+/* ============================================================
    Cooling Tower Chemistry Challenge — game engine
    ============================================================ */
 (function () {
   "use strict";
 
+  var READ_MS       = 5000;    // question alone, no answers, no clock
+  var PREVIEW_MS    = 3000;    // answers shown, clock still held
   var QUESTION_TIME = 20000;   // ms of "free residual" per question
   var BASE_POINTS   = 100;
   var TIME_BONUS    = 60;
@@ -1894,6 +2417,8 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
 
   var state = load();
   var run = null;           // active quiz run
+  var heroFx = null, rigFx = null, scFx = null;
+  var phaseTimer = null, phaseTick = null, sceneTimers = [];
   var timer = null;
 
   function blank() {
@@ -1948,7 +2473,9 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
   var views = {
     console:  $("view-console"),
     brief:    $("view-brief"),
+    ready:    $("view-ready"),
     quiz:     $("view-quiz"),
+    collapse: $("view-collapse"),
     debrief:  $("view-debrief")
   };
 
@@ -2141,7 +2668,17 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
   }
 
   $("bBack").addEventListener("click", goHome);
-  $("bStart").addEventListener("click", function () { startRun(currentTopic); });
+  $("bStart").addEventListener("click", function () { openReady(currentTopic); });
+
+  function openReady(t) {
+    currentTopic = t;
+    $("rTag").textContent = tagOf(t) + " · " + t.title;
+    $("rLede").textContent = "Five questions on " + t.title.toLowerCase()
+      + ". Here is exactly how the round runs.";
+    show("ready");
+  }
+  $("rBack").addEventListener("click", function () { openBrief(currentTopic.id); });
+  $("rGo").addEventListener("click", function () { startRun(currentTopic); });
 
   /* ---------------- quiz run ---------------- */
 
@@ -2180,8 +2717,55 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
       timeouts: 0,
       log: []
     };
+    run.wrong = 0;
+    buildRig();
     show("quiz");
     renderQuestion();
+  }
+
+  /* ---------------- damage rig ---------------- */
+
+  function buildRig() {
+    $("rigSvg").innerHTML = towerMarkup("rig", { labels: false });
+    $("rigSvg").classList.remove("fell");
+    $("rigStage").className = "rig-stage";
+    $("rigLog").textContent = "";
+    setRigStatus("nominal", "ok");
+    if (!rigFx) rigFx = new Fx($("rigFx"));
+    rigFx.clear();
+    rigFx.vapor = true;
+    rigFx.size();
+    rigFx.start();
+  }
+
+  function setRigStatus(text, level) {
+    $("rigText").textContent = "Unit CT-1 · " + text;
+    $("rigStatus").dataset.level = level === "ok" ? "" : level;
+  }
+
+  // Shear one component off for each wrong answer, in a fixed order so the
+  // tower degrades legibly rather than at random.
+  function damageRig(n) {
+    var part = TOWER_PARTS[n - 1];
+    if (!part) return;
+    var node = $("rig-" + part.id);
+    if (node) {
+      node.classList.add("shed");
+      setTimeout(function () { node.classList.add("gone"); }, 1150);
+    }
+    if (rigFx) rigFx.burst(part.at[0], part.at[1], 16, "dust");
+    if (n >= 1) rigFx.vapor = false;          // fan is gone, so is the plume
+
+    var li = el("li", "", part.label + " lost");
+    $("rigLog").appendChild(li);
+
+    var label = n >= 4 ? "critical" : (n >= 2 ? "degraded" : "damaged");
+    setRigStatus(label, n >= 4 ? "bad" : "warn");
+  }
+
+  function stopRig() {
+    if (rigFx) rigFx.stop();
+    $("rigStage").className = "rig-stage";
   }
 
   function renderQuestion() {
@@ -2209,8 +2793,55 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
       host.appendChild(b);
     });
 
-    startTimer();
+    // Phase 1 read the question, phase 2 read the answers, phase 3 clock runs.
+    host.hidden = true;
+    run.qStart = null;
+    holdResidual();
+    countdown("Answers appear in", Math.round(READ_MS / 1000), function () {
+      host.hidden = false;
+      countdown("Clock starts in", Math.round(PREVIEW_MS / 1000), function () {
+        setPhase("");
+        startTimer();
+      });
+    });
+
     renderRail();
+  }
+
+  function setPhase(label, secs) {
+    var n = $("qPhase");
+    n.textContent = "";
+    if (!label) return;
+    n.appendChild(document.createTextNode(label + " "));
+    n.appendChild(el("b", "", secs + "s"));
+  }
+
+  function clearPhase() {
+    if (phaseTimer) { clearTimeout(phaseTimer); phaseTimer = null; }
+    if (phaseTick) { clearInterval(phaseTick); phaseTick = null; }
+  }
+
+  function countdown(label, secs, done) {
+    clearPhase();
+    var left = secs;
+    setPhase(label, left);
+    phaseTick = setInterval(function () {
+      left--;
+      if (left <= 0) { clearInterval(phaseTick); phaseTick = null; return; }
+      setPhase(label, left);
+    }, 1000);
+    phaseTimer = setTimeout(function () {
+      clearPhase();
+      done();
+    }, secs * 1000);
+  }
+
+  function holdResidual() {
+    var fill = $("residualFill"), bar = $("residual");
+    bar.classList.remove("low");
+    bar.classList.add("held");
+    fill.style.transition = "none";
+    fill.style.transform = "scaleX(1)";
   }
 
   function multiplier() {
@@ -2225,14 +2856,19 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
     fill.style.transition = "none";
     fill.style.transform = "scaleX(1)";
 
+    bar.classList.remove("held");
     var t0 = performance.now();
     run.qStart = t0;
+    var stage = $("rigStage");
 
     timer = requestAnimationFrame(function step(now) {
       var frac = 1 - (now - t0) / QUESTION_TIME;
       if (frac <= 0) { fill.style.transform = "scaleX(0)"; answer(-1); return; }
       fill.style.transform = "scaleX(" + frac.toFixed(4) + ")";
       bar.classList.toggle("low", frac < 0.25);
+      // past the halfway mark the tower starts to rumble, harder near the end
+      stage.classList.toggle("shake", frac < 0.5);
+      stage.classList.toggle("shake-hard", frac < 0.2);
       timer = requestAnimationFrame(step);
     });
   }
@@ -2243,10 +2879,17 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
 
   function answer(picked) {
     stopTimer();
+    clearPhase();
+    $("qOpts").hidden = false;
+    $("rigStage").classList.remove("shake", "shake-hard");
+    setPhase("");
     var q = run.queue[run.i];
     var timedOut = picked < 0;
     var hit = !timedOut && picked === q.answer;
-    var remain = Math.max(0, 1 - (performance.now() - run.qStart) / QUESTION_TIME);
+    // Answering before the clock starts keeps the full speed bonus.
+    var remain = run.qStart
+      ? Math.max(0, 1 - (performance.now() - run.qStart) / QUESTION_TIME)
+      : 1;
 
     var pts = 0;
     if (hit) {
@@ -2258,6 +2901,8 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
     } else {
       run.streak = 0;
       if (timedOut) run.timeouts++;
+      run.wrong++;
+      damageRig(run.wrong);
     }
     run.score += pts;
     run.xp += Math.round(pts / 10);
@@ -2291,13 +2936,89 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
     host.appendChild(v);
     btn.focus();
     renderRail();
+
+    if (run.wrong === 4) setTimeout(function () { $("pipDlg").showModal(); }, 700);
+    else if (run.wrong === 5) setTimeout(function () { $("hrDlg").showModal(); }, 700);
   }
+
+  $("pipOk").addEventListener("click", function () { $("pipDlg").close(); });
+  $("hrOk").addEventListener("click", function () { $("hrDlg").close(); });
 
   function next() {
     run.i++;
-    if (run.i < run.queue.length) renderQuestion();
-    else finish();
+    if (run.i < run.queue.length) return renderQuestion();
+    stopRig();
+    if (run.wrong >= run.queue.length) return playCollapse();
+    finish();
   }
+
+  /* ---------------- catastrophic failure ---------------- */
+
+  function playCollapse() {
+    var svg = $("scSvg"), scene = $("scene");
+    svg.innerHTML = towerMarkup("sc", { labels: false });
+    svg.classList.remove("fell");
+    scene.classList.remove("quake");
+    $("scEnd").hidden = true;
+    $("scCap").className = "scene-cap";
+    show("collapse");
+
+    if (!scFx) scFx = new Fx($("scFx"));
+    scFx.clear();
+    scFx.vapor = false;
+    scFx.size();
+    scFx.start();
+
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) { collapseEnd(true); return; }
+
+    var at = function (ms, fn) { sceneTimers.push(setTimeout(fn, ms)); };
+    var cap = function (text) {
+      $("scCap").textContent = text;
+      $("scCap").classList.add("on");
+    };
+
+    cap("Structural failure detected");
+    at(300,  function () { svg.classList.add("fell"); });          // the slow lean
+    at(900,  function () { scFx.burst(0.32, 0.72, 14, "dust"); });
+    at(1900, function () { cap("Fill pack collapse"); scFx.burst(0.5, 0.58, 20, "dust"); });
+    at(3100, function () { scFx.burst(0.62, 0.70, 18, "dust"); });
+    at(4600, function () {                                          // impact
+      cap("Impact");
+      scene.classList.add("quake");
+      scFx.ground(0.52, 0.80, 46);
+    });
+    at(5100, function () { scFx.ground(0.70, 0.82, 30); });
+    at(5700, function () { scFx.ground(0.38, 0.82, 24); });
+    at(6200, function () { cap("Hydrocarbon ignition"); scFx.ignite(0.60, 0.765, 0.18); });
+    at(7000, function () { scFx.stoke(0.22); });
+    at(7900, function () { scFx.stoke(0.24); scFx.ignite(0.46, 0.775, 0.16); });
+    at(8800, function () { scFx.stoke(0.30); cap("Unit CT-1 · total loss"); });
+    at(9500, function () { scFx.stoke(0.25); });
+    at(10200, function () { collapseEnd(false); });
+  }
+
+  function collapseEnd(instant) {
+    var svg = $("scSvg");
+    if (instant) {
+      svg.classList.add("fell");
+      scFx.ignite(0.60, 0.765, 0.8);
+      scFx.ignite(0.46, 0.775, 0.5);
+      for (var i = 0; i < 60; i++) scFx.step();     // settle a static scene
+    }
+    $("scCap").classList.remove("on");
+    $("scEnd").hidden = false;
+    $("scNext").focus();
+  }
+
+  function clearScene() {
+    sceneTimers.forEach(clearTimeout);
+    sceneTimers = [];
+    if (scFx) { scFx.stop(); scFx.clear(); }
+  }
+
+  $("scSkip").addEventListener("click", function () { clearScene(); scFx.start(); collapseEnd(true); });
+  $("scNext").addEventListener("click", function () { clearScene(); finish(); });
 
   function finish() {
     var t = run.topic;
@@ -2368,14 +3089,14 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
   /* ---------------- navigation ---------------- */
 
   function goHome() {
-    stopTimer(); run = null;
+    stopTimer(); clearPhase(); clearScene(); stopRig(); run = null;
     renderRail(); renderIndex(); renderBadges();
     show("console");
   }
 
   $("homeBtn").addEventListener("click", goHome);
   $("dIndex").addEventListener("click", goHome);
-  $("dRetry").addEventListener("click", function () { openBrief(currentTopic.id); });
+  $("dRetry").addEventListener("click", function () { openReady(currentTopic); });
   $("dNext").addEventListener("click", function () {
     var t = nextTopicAfter(currentTopic.id);
     openBrief(t.id);
@@ -2412,83 +3133,10 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = TOPICS; 
 
   /* ---------------- tower plume ---------------- */
 
-  (function plume() {
-    var cv = $("plume");
-    if (!cv) return;
-    var ctx = cv.getContext("2d");
-    var parts = [];
-    var W = 0, H = 0;
-    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    function size() {
-      var r = cv.getBoundingClientRect();
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = r.width; H = r.height;
-      cv.width = Math.max(1, Math.round(W * dpr));
-      cv.height = Math.max(1, Math.round(H * dpr));
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function color() {
-      return getComputedStyle(document.documentElement)
-        .getPropertyValue("--plume").trim() || "#7E9AA0";
-    }
-
-    function spawn() {
-      // fan stack sits at (200, 92) in the 400x340 SVG viewBox
-      parts.push({
-        x: W * 0.5 + (Math.random() - 0.5) * W * 0.10,
-        y: H * 0.271,
-        r: W * (0.03 + Math.random() * 0.035),
-        vy: -(0.22 + Math.random() * 0.24),
-        vx: (0.03 + Math.random() * 0.09),
-        life: 1
-      });
-    }
-
-    var last = 0;
-    function frame(now) {
-      requestAnimationFrame(frame);
-      if (now - last < 32) return;          // ~30fps is plenty for vapor
-      last = now;
-      if (!W) size();
-
-      if (parts.length < 34 && Math.random() < 0.6) spawn();
-      ctx.clearRect(0, 0, W, H);
-      var c = color();
-
-      for (var i = parts.length - 1; i >= 0; i--) {
-        var p = parts[i];
-        p.x += p.vx; p.y += p.vy;
-        p.r *= 1.012;
-        p.life -= 0.011;
-        if (p.life <= 0 || p.y + p.r < 0) { parts.splice(i, 1); continue; }
-        var g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        g.addColorStop(0, hexA(c, 0.13 * p.life));
-        g.addColorStop(1, hexA(c, 0));
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    function hexA(hex, a) {
-      var h = hex.replace("#", "");
-      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-      var n = parseInt(h, 16);
-      return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a.toFixed(3) + ")";
-    }
-
-    size();
-    window.addEventListener("resize", size);
-    if (reduce) {
-      // static puff so the illustration still reads at rest
-      for (var i = 0; i < 26; i++) { spawn(); parts[i].y -= Math.random() * H * 0.2; }
-      requestAnimationFrame(function (n) { last = n - 40; frame(n); });
-    } else {
-      requestAnimationFrame(frame);
-    }
+  (function heroTower() {
+    $("heroSvg").innerHTML = towerMarkup("hero", { labels: true });
+    heroFx = new Fx($("plume"));
+    heroFx.start();
   })();
 
   /* ---------------- schematic readout drift ---------------- */

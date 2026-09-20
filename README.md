@@ -34,7 +34,15 @@ and discharge compliance.
 
 ## Game mechanics
 
+- **Paced questions** — each question appears alone for **5 s**, then the four answers appear
+  for **3 s** with the clock still held, then the clock starts. Answering during either
+  pause keeps the full speed bonus.
 - **Residual clock** — 20 s per question, drawn as a draining free-halogen residual bar. Answer faster, score more (up to +60 bonus on a 100-point base).
+- **Consequences** — Unit CT-1 stands beside the quiz. It rumbles once the residual drops
+  past halfway, and sheds a component for every wrong answer (fan, drift eliminators,
+  header, fill, louvers, in that order). Four wrong triggers a PIP notice; five wrong sends
+  you to HR and topples the tower in a dust-and-fire scene. Both notices carry a visible
+  "no actual HR department was contacted" line so the joke cannot be mistaken for real.
 - **Streak multiplier** — consecutive correct answers build a multiplier up to ×2.0.
 - **Ranks** — XP carries you from Trainee through Water Tech, Field Chemist, Treatment Specialist and Systems Engineer to Principal.
 - **Commendations** — eight badges: Zero Blowdown (a perfect module), Breakpoint (a 10-answer streak), Free Residual (a module with no timeouts), Full Turnaround (all 25), and the three category sweeps.
@@ -102,6 +110,7 @@ Keeping the board in its own collection means the top-10 read needs no filter be
 index.html                     app shell
 css/styles.css                 theme tokens + all styling (light and dark)
 js/topics.js                   the 25-topic question database
+js/scene.js                    shared tower artwork + the particle engine
 js/app.js                      game engine
 tools/build-artifact.js        inlines everything into one file
 dist/cooling-tower-quiz.html   single-file build

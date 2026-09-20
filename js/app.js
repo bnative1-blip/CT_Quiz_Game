@@ -4,6 +4,8 @@
 (function () {
   "use strict";
 
+  var READ_MS       = 5000;    // question alone, no answers, no clock
+  var PREVIEW_MS    = 3000;    // answers shown, clock still held
   var QUESTION_TIME = 20000;   // ms of "free residual" per question
   var BASE_POINTS   = 100;
   var TIME_BONUS    = 60;
@@ -41,6 +43,8 @@
 
   var state = load();
   var run = null;           // active quiz run
+  var heroFx = null, rigFx = null, scFx = null;
+  var phaseTimer = null, phaseTick = null, sceneTimers = [];
   var timer = null;
 
   function blank() {
@@ -95,7 +99,9 @@
   var views = {
     console:  $("view-console"),
     brief:    $("view-brief"),
+    ready:    $("view-ready"),
     quiz:     $("view-quiz"),
+    collapse: $("view-collapse"),
     debrief:  $("view-debrief")
   };
 
@@ -288,7 +294,17 @@
   }
 
   $("bBack").addEventListener("click", goHome);
-  $("bStart").addEventListener("click", function () { startRun(currentTopic); });
+  $("bStart").addEventListener("click", function () { openReady(currentTopic); });
+
+  function openReady(t) {
+    currentTopic = t;
+    $("rTag").textContent = tagOf(t) + " · " + t.title;
+    $("rLede").textContent = "Five questions on " + t.title.toLowerCase()
+      + ". Here is exactly how the round runs.";
+    show("ready");
+  }
+  $("rBack").addEventListener("click", function () { openBrief(currentTopic.id); });
+  $("rGo").addEventListener("click", function () { startRun(currentTopic); });
 
   /* ---------------- quiz run ---------------- */
 
@@ -327,8 +343,55 @@
       timeouts: 0,
       log: []
     };
+    run.wrong = 0;
+    buildRig();
     show("quiz");
     renderQuestion();
+  }
+
+  /* ---------------- damage rig ---------------- */
+
+  function buildRig() {
+    $("rigSvg").innerHTML = towerMarkup("rig", { labels: false });
+    $("rigSvg").classList.remove("fell");
+    $("rigStage").className = "rig-stage";
+    $("rigLog").textContent = "";
+    setRigStatus("nominal", "ok");
+    if (!rigFx) rigFx = new Fx($("rigFx"));
+    rigFx.clear();
+    rigFx.vapor = true;
+    rigFx.size();
+    rigFx.start();
+  }
+
+  function setRigStatus(text, level) {
+    $("rigText").textContent = "Unit CT-1 · " + text;
+    $("rigStatus").dataset.level = level === "ok" ? "" : level;
+  }
+
+  // Shear one component off for each wrong answer, in a fixed order so the
+  // tower degrades legibly rather than at random.
+  function damageRig(n) {
+    var part = TOWER_PARTS[n - 1];
+    if (!part) return;
+    var node = $("rig-" + part.id);
+    if (node) {
+      node.classList.add("shed");
+      setTimeout(function () { node.classList.add("gone"); }, 1150);
+    }
+    if (rigFx) rigFx.burst(part.at[0], part.at[1], 16, "dust");
+    if (n >= 1) rigFx.vapor = false;          // fan is gone, so is the plume
+
+    var li = el("li", "", part.label + " lost");
+    $("rigLog").appendChild(li);
+
+    var label = n >= 4 ? "critical" : (n >= 2 ? "degraded" : "damaged");
+    setRigStatus(label, n >= 4 ? "bad" : "warn");
+  }
+
+  function stopRig() {
+    if (rigFx) rigFx.stop();
+    $("rigStage").className = "rig-stage";
   }
 
   function renderQuestion() {
@@ -356,8 +419,55 @@
       host.appendChild(b);
     });
 
-    startTimer();
+    // Phase 1 read the question, phase 2 read the answers, phase 3 clock runs.
+    host.hidden = true;
+    run.qStart = null;
+    holdResidual();
+    countdown("Answers appear in", Math.round(READ_MS / 1000), function () {
+      host.hidden = false;
+      countdown("Clock starts in", Math.round(PREVIEW_MS / 1000), function () {
+        setPhase("");
+        startTimer();
+      });
+    });
+
     renderRail();
+  }
+
+  function setPhase(label, secs) {
+    var n = $("qPhase");
+    n.textContent = "";
+    if (!label) return;
+    n.appendChild(document.createTextNode(label + " "));
+    n.appendChild(el("b", "", secs + "s"));
+  }
+
+  function clearPhase() {
+    if (phaseTimer) { clearTimeout(phaseTimer); phaseTimer = null; }
+    if (phaseTick) { clearInterval(phaseTick); phaseTick = null; }
+  }
+
+  function countdown(label, secs, done) {
+    clearPhase();
+    var left = secs;
+    setPhase(label, left);
+    phaseTick = setInterval(function () {
+      left--;
+      if (left <= 0) { clearInterval(phaseTick); phaseTick = null; return; }
+      setPhase(label, left);
+    }, 1000);
+    phaseTimer = setTimeout(function () {
+      clearPhase();
+      done();
+    }, secs * 1000);
+  }
+
+  function holdResidual() {
+    var fill = $("residualFill"), bar = $("residual");
+    bar.classList.remove("low");
+    bar.classList.add("held");
+    fill.style.transition = "none";
+    fill.style.transform = "scaleX(1)";
   }
 
   function multiplier() {
@@ -372,14 +482,19 @@
     fill.style.transition = "none";
     fill.style.transform = "scaleX(1)";
 
+    bar.classList.remove("held");
     var t0 = performance.now();
     run.qStart = t0;
+    var stage = $("rigStage");
 
     timer = requestAnimationFrame(function step(now) {
       var frac = 1 - (now - t0) / QUESTION_TIME;
       if (frac <= 0) { fill.style.transform = "scaleX(0)"; answer(-1); return; }
       fill.style.transform = "scaleX(" + frac.toFixed(4) + ")";
       bar.classList.toggle("low", frac < 0.25);
+      // past the halfway mark the tower starts to rumble, harder near the end
+      stage.classList.toggle("shake", frac < 0.5);
+      stage.classList.toggle("shake-hard", frac < 0.2);
       timer = requestAnimationFrame(step);
     });
   }
@@ -390,10 +505,17 @@
 
   function answer(picked) {
     stopTimer();
+    clearPhase();
+    $("qOpts").hidden = false;
+    $("rigStage").classList.remove("shake", "shake-hard");
+    setPhase("");
     var q = run.queue[run.i];
     var timedOut = picked < 0;
     var hit = !timedOut && picked === q.answer;
-    var remain = Math.max(0, 1 - (performance.now() - run.qStart) / QUESTION_TIME);
+    // Answering before the clock starts keeps the full speed bonus.
+    var remain = run.qStart
+      ? Math.max(0, 1 - (performance.now() - run.qStart) / QUESTION_TIME)
+      : 1;
 
     var pts = 0;
     if (hit) {
@@ -405,6 +527,8 @@
     } else {
       run.streak = 0;
       if (timedOut) run.timeouts++;
+      run.wrong++;
+      damageRig(run.wrong);
     }
     run.score += pts;
     run.xp += Math.round(pts / 10);
@@ -438,13 +562,89 @@
     host.appendChild(v);
     btn.focus();
     renderRail();
+
+    if (run.wrong === 4) setTimeout(function () { $("pipDlg").showModal(); }, 700);
+    else if (run.wrong === 5) setTimeout(function () { $("hrDlg").showModal(); }, 700);
   }
+
+  $("pipOk").addEventListener("click", function () { $("pipDlg").close(); });
+  $("hrOk").addEventListener("click", function () { $("hrDlg").close(); });
 
   function next() {
     run.i++;
-    if (run.i < run.queue.length) renderQuestion();
-    else finish();
+    if (run.i < run.queue.length) return renderQuestion();
+    stopRig();
+    if (run.wrong >= run.queue.length) return playCollapse();
+    finish();
   }
+
+  /* ---------------- catastrophic failure ---------------- */
+
+  function playCollapse() {
+    var svg = $("scSvg"), scene = $("scene");
+    svg.innerHTML = towerMarkup("sc", { labels: false });
+    svg.classList.remove("fell");
+    scene.classList.remove("quake");
+    $("scEnd").hidden = true;
+    $("scCap").className = "scene-cap";
+    show("collapse");
+
+    if (!scFx) scFx = new Fx($("scFx"));
+    scFx.clear();
+    scFx.vapor = false;
+    scFx.size();
+    scFx.start();
+
+    var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) { collapseEnd(true); return; }
+
+    var at = function (ms, fn) { sceneTimers.push(setTimeout(fn, ms)); };
+    var cap = function (text) {
+      $("scCap").textContent = text;
+      $("scCap").classList.add("on");
+    };
+
+    cap("Structural failure detected");
+    at(300,  function () { svg.classList.add("fell"); });          // the slow lean
+    at(900,  function () { scFx.burst(0.32, 0.72, 14, "dust"); });
+    at(1900, function () { cap("Fill pack collapse"); scFx.burst(0.5, 0.58, 20, "dust"); });
+    at(3100, function () { scFx.burst(0.62, 0.70, 18, "dust"); });
+    at(4600, function () {                                          // impact
+      cap("Impact");
+      scene.classList.add("quake");
+      scFx.ground(0.52, 0.80, 46);
+    });
+    at(5100, function () { scFx.ground(0.70, 0.82, 30); });
+    at(5700, function () { scFx.ground(0.38, 0.82, 24); });
+    at(6200, function () { cap("Hydrocarbon ignition"); scFx.ignite(0.60, 0.765, 0.18); });
+    at(7000, function () { scFx.stoke(0.22); });
+    at(7900, function () { scFx.stoke(0.24); scFx.ignite(0.46, 0.775, 0.16); });
+    at(8800, function () { scFx.stoke(0.30); cap("Unit CT-1 · total loss"); });
+    at(9500, function () { scFx.stoke(0.25); });
+    at(10200, function () { collapseEnd(false); });
+  }
+
+  function collapseEnd(instant) {
+    var svg = $("scSvg");
+    if (instant) {
+      svg.classList.add("fell");
+      scFx.ignite(0.60, 0.765, 0.8);
+      scFx.ignite(0.46, 0.775, 0.5);
+      for (var i = 0; i < 60; i++) scFx.step();     // settle a static scene
+    }
+    $("scCap").classList.remove("on");
+    $("scEnd").hidden = false;
+    $("scNext").focus();
+  }
+
+  function clearScene() {
+    sceneTimers.forEach(clearTimeout);
+    sceneTimers = [];
+    if (scFx) { scFx.stop(); scFx.clear(); }
+  }
+
+  $("scSkip").addEventListener("click", function () { clearScene(); scFx.start(); collapseEnd(true); });
+  $("scNext").addEventListener("click", function () { clearScene(); finish(); });
 
   function finish() {
     var t = run.topic;
@@ -515,14 +715,14 @@
   /* ---------------- navigation ---------------- */
 
   function goHome() {
-    stopTimer(); run = null;
+    stopTimer(); clearPhase(); clearScene(); stopRig(); run = null;
     renderRail(); renderIndex(); renderBadges();
     show("console");
   }
 
   $("homeBtn").addEventListener("click", goHome);
   $("dIndex").addEventListener("click", goHome);
-  $("dRetry").addEventListener("click", function () { openBrief(currentTopic.id); });
+  $("dRetry").addEventListener("click", function () { openReady(currentTopic); });
   $("dNext").addEventListener("click", function () {
     var t = nextTopicAfter(currentTopic.id);
     openBrief(t.id);
@@ -559,83 +759,10 @@
 
   /* ---------------- tower plume ---------------- */
 
-  (function plume() {
-    var cv = $("plume");
-    if (!cv) return;
-    var ctx = cv.getContext("2d");
-    var parts = [];
-    var W = 0, H = 0;
-    var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    function size() {
-      var r = cv.getBoundingClientRect();
-      var dpr = Math.min(window.devicePixelRatio || 1, 2);
-      W = r.width; H = r.height;
-      cv.width = Math.max(1, Math.round(W * dpr));
-      cv.height = Math.max(1, Math.round(H * dpr));
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-
-    function color() {
-      return getComputedStyle(document.documentElement)
-        .getPropertyValue("--plume").trim() || "#7E9AA0";
-    }
-
-    function spawn() {
-      // fan stack sits at (200, 92) in the 400x340 SVG viewBox
-      parts.push({
-        x: W * 0.5 + (Math.random() - 0.5) * W * 0.10,
-        y: H * 0.271,
-        r: W * (0.03 + Math.random() * 0.035),
-        vy: -(0.22 + Math.random() * 0.24),
-        vx: (0.03 + Math.random() * 0.09),
-        life: 1
-      });
-    }
-
-    var last = 0;
-    function frame(now) {
-      requestAnimationFrame(frame);
-      if (now - last < 32) return;          // ~30fps is plenty for vapor
-      last = now;
-      if (!W) size();
-
-      if (parts.length < 34 && Math.random() < 0.6) spawn();
-      ctx.clearRect(0, 0, W, H);
-      var c = color();
-
-      for (var i = parts.length - 1; i >= 0; i--) {
-        var p = parts[i];
-        p.x += p.vx; p.y += p.vy;
-        p.r *= 1.012;
-        p.life -= 0.011;
-        if (p.life <= 0 || p.y + p.r < 0) { parts.splice(i, 1); continue; }
-        var g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
-        g.addColorStop(0, hexA(c, 0.13 * p.life));
-        g.addColorStop(1, hexA(c, 0));
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    function hexA(hex, a) {
-      var h = hex.replace("#", "");
-      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-      var n = parseInt(h, 16);
-      return "rgba(" + ((n >> 16) & 255) + "," + ((n >> 8) & 255) + "," + (n & 255) + "," + a.toFixed(3) + ")";
-    }
-
-    size();
-    window.addEventListener("resize", size);
-    if (reduce) {
-      // static puff so the illustration still reads at rest
-      for (var i = 0; i < 26; i++) { spawn(); parts[i].y -= Math.random() * H * 0.2; }
-      requestAnimationFrame(function (n) { last = n - 40; frame(n); });
-    } else {
-      requestAnimationFrame(frame);
-    }
+  (function heroTower() {
+    $("heroSvg").innerHTML = towerMarkup("hero", { labels: true });
+    heroFx = new Fx($("plume"));
+    heroFx.start();
   })();
 
   /* ---------------- schematic readout drift ---------------- */

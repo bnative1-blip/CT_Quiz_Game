@@ -21,6 +21,7 @@ const out = [
   '<style>\n' + read('css/styles.css') + '\n</style>',
   body.trim()
     .replace(/<script src="js\/topics\.js"><\/script>/, '<script>\n' + read('js/topics.js') + '\n</script>')
+    .replace(/<script src="js\/scene\.js"><\/script>/,  '<script>\n' + read('js/scene.js') + '\n</script>')
     .replace(/<script src="js\/app\.js"><\/script>/,   '<script>\n' + read('js/app.js') + '\n</script>')
 ].join('\n');
 

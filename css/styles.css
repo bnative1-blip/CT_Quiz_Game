@@ -93,6 +93,10 @@
 /* ---------- Base ---------- */
 * { box-sizing: border-box; }
 
+/* The artifact host ships this in its own reset; the standalone file needs it
+   too, or any `display:` rule silently defeats the hidden attribute. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--ground);
@@ -737,6 +741,194 @@ button { font: inherit; color: inherit; cursor: pointer; }
   margin-top: 40px; padding: 22px 0 46px;
   font-family: var(--font-mono); font-size: 11px;
   color: var(--ink-3); line-height: 1.7;
+}
+
+/* ---------- Pre-quiz brief ---------- */
+.ready { max-width: 660px; margin: 0 auto; padding-top: 42px; }
+.ready-title { font-size: clamp(30px, 4.4vw, 42px); letter-spacing: -.03em; margin: 10px 0 12px; }
+.ready-lede { font-size: 17.5px; color: var(--ink-2); margin: 0 0 28px; }
+.steps { list-style: none; margin: 0 0 26px; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.steps li {
+  display: flex; gap: 16px; align-items: flex-start;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+}
+.steps li:last-child { border-bottom: 1px solid var(--line); }
+.step-n {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  width: 24px; height: 24px; flex: none;
+  border: 1px solid var(--amber); color: var(--amber);
+  border-radius: 50%; display: grid; place-items: center;
+  margin-top: 1px;
+}
+.steps h4 { font-size: 16px; letter-spacing: -.01em; margin-bottom: 3px; }
+.steps p { margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.steps b { color: var(--ink); font-weight: 600; }
+.ready-foot {
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-3);
+  margin: 0 0 24px;
+}
+.ready-foot b { color: var(--ink-2); font-weight: 500; }
+
+/* ---------- Quiz layout with the damage rig ---------- */
+.quiz-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 40px;
+  align-items: start;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.quiz-grid .quiz { max-width: none; margin: 0; }
+
+.rig { position: sticky; top: 82px; display: flex; flex-direction: column; gap: 10px; padding-top: 30px; }
+.rig-stage {
+  position: relative;
+  aspect-ratio: 4 / 3.4;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: linear-gradient(to bottom, var(--surface-2), var(--surface));
+  overflow: hidden;
+}
+.rig-stage canvas, .rig-stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* shake builds once the residual is past halfway */
+.rig-stage.shake svg { animation: rumble .18s linear infinite; }
+.rig-stage.shake-hard svg { animation: rumble .1s linear infinite; }
+@keyframes rumble {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25%  { transform: translate(-1.1px, .6px) rotate(-.22deg); }
+  50%  { transform: translate(.9px, -.7px) rotate(.18deg); }
+  75%  { transform: translate(-.7px, -.4px) rotate(.12deg); }
+}
+
+.rig-status {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-3);
+}
+.rig-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); flex: none; }
+.rig-status[data-level="warn"] .rig-dot { background: var(--amber); }
+.rig-status[data-level="bad"]  .rig-dot { background: var(--bad); }
+.rig-status[data-level="bad"]  { color: var(--bad); }
+.rig-status[data-level="warn"] { color: var(--amber); }
+
+.rig-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.rig-log li {
+  font-family: var(--font-mono); font-size: 10.5px; line-height: 1.45;
+  color: var(--bad);
+  padding-left: 13px; position: relative;
+  animation: rise .35s cubic-bezier(.2,.8,.25,1) backwards;
+}
+.rig-log li::before { content: "\2716"; position: absolute; left: 0; top: 0; font-size: 8px; }
+
+/* a sheared component tumbles away */
+.part { transform-origin: 50% 50%; transform-box: fill-box; }
+.part.shed { animation: shear 1.15s cubic-bezier(.35,0,.85,1) forwards; }
+@keyframes shear {
+  0%   { transform: translate(0,0) rotate(0deg); opacity: 1; }
+  15%  { transform: translate(2px,-4px) rotate(-5deg); opacity: 1; }
+  100% { transform: translate(26px,150px) rotate(82deg); opacity: 0; }
+}
+.part.gone { opacity: 0; }
+
+/* ---------- Collapse scene ---------- */
+.scene {
+  position: relative;
+  max-width: 900px;
+  margin: 24px auto 0;
+  aspect-ratio: 4 / 3.1;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: linear-gradient(to bottom, var(--surface-2) 0%, var(--surface) 62%, var(--surface-3) 100%);
+}
+.scene canvas, .scene svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scene.quake { animation: quake .28s linear 3; }
+@keyframes quake {
+  0%,100% { transform: translate(0,0); }
+  20% { transform: translate(-6px, 3px); }
+  40% { transform: translate(5px, -4px); }
+  60% { transform: translate(-4px, -2px); }
+  80% { transform: translate(3px, 3px); }
+}
+#scSvg #sc-root {
+  transform-origin: 200px 268px;
+  transform-box: view-box;
+  transition: transform 4.6s cubic-bezier(.62,.02,.82,1);
+}
+#scSvg.fell #sc-root { transform: translate(-42px, -85px) rotate(82deg); }
+
+.scene-cap {
+  position: absolute; left: 0; right: 0; top: 16px;
+  text-align: center;
+  font-family: var(--font-mono); font-size: 11.5px;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--bad);
+  opacity: 0; transition: opacity .5s;
+}
+.scene-cap.on { opacity: 1; }
+.scene-skip {
+  position: absolute; right: 12px; top: 12px; z-index: 3;
+  background: var(--surface); opacity: .8;
+}
+.scene-end {
+  position: absolute; inset: 0; z-index: 4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 14px; padding: 24px; text-align: center;
+  background: color-mix(in srgb, var(--ground) 72%, transparent);
+  backdrop-filter: blur(3px);
+  animation: rise .7s cubic-bezier(.2,.8,.25,1) backwards;
+}
+.scene-kicker {
+  font-family: var(--font-mono); font-size: 10.5px;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--bad);
+  margin: 0;
+}
+.scene-end h2 {
+  font-size: clamp(26px, 4.6vw, 46px);
+  letter-spacing: -.03em;
+  max-width: 16ch;
+  color: var(--amber);
+}
+
+/* ---------- HR notices ---------- */
+.sheet.notice { max-width: 460px; }
+.notice-body { padding: 24px 26px 20px; display: flex; flex-direction: column; gap: 12px; }
+.notice-kicker {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--amber);
+}
+.sheet.grave .notice-kicker { color: var(--bad); }
+.notice-body h3 { font-size: 22px; letter-spacing: -.022em; }
+.notice-body p { margin: 0; font-size: 15.5px; line-height: 1.6; color: var(--ink-2); }
+.notice-body p b { color: var(--ink); font-weight: 600; }
+.notice-wink {
+  font-family: var(--font-mono);
+  font-size: 11px !important; line-height: 1.6 !important;
+  color: var(--ink-3) !important;
+  border-left: 2px solid var(--line-2); padding-left: 11px;
+}
+
+/* ---------- Question phase cue ---------- */
+.phase {
+  font-family: var(--font-mono); font-size: 11px;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-3);
+  min-height: 16px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.phase b { color: var(--amber); font-weight: 600; font-variant-numeric: tabular-nums; }
+.residual.held .residual-fill { background: var(--line-2); }
+
+@media (max-width: 900px) {
+  .quiz-grid { grid-template-columns: 1fr; gap: 20px; }
+  .rig { position: static; flex-direction: row; align-items: center; gap: 14px; padding-top: 18px; }
+  .rig-stage { width: 150px; flex: none; }
+  .rig-log { flex: 1; }
 }
 
 /* ---------- Motion ---------- */
