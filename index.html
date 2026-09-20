@@ -211,6 +211,16 @@
 <section class="view" id="view-quiz" hidden>
   <div class="wrap">
     <div class="quiz-grid">
+    <aside class="rig">
+      <div class="rig-stage" id="rigStage">
+        <canvas id="rigFx"></canvas>
+        <svg id="rigSvg" viewBox="0 0 400 340" fill="none" aria-hidden="true"></svg>
+      </div>
+      <div class="rig-status" id="rigStatus">
+        <span class="rig-dot"></span><span id="rigText">Unit CT-1 &middot; nominal</span>
+      </div>
+      <ul class="rig-log" id="rigLog"></ul>
+    </aside>
     <div class="quiz">
       <div class="q-head">
         <span class="q-count mono" id="qCount">Question 1 of 5</span>
@@ -227,16 +237,7 @@
       <div id="qVerdict"></div>
     </div>
 
-    <aside class="rig">
-      <div class="rig-stage" id="rigStage">
-        <canvas id="rigFx"></canvas>
-        <svg id="rigSvg" viewBox="0 0 400 340" fill="none" aria-hidden="true"></svg>
-      </div>
-      <div class="rig-status" id="rigStatus">
-        <span class="rig-dot"></span><span id="rigText">Unit CT-1 &middot; nominal</span>
-      </div>
-      <ul class="rig-log" id="rigLog"></ul>
-    </aside>
+
     </div>
   </div>
 </section>
