@@ -215,7 +215,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  font-size: 13px; letter-spacing: .16em; text-transform: uppercase;
   color: var(--amber);
   display: flex; align-items: center; gap: 9px;
   margin-bottom: 18px;
@@ -280,13 +280,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .tower-stage svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .stage-caption {
   position: absolute; left: 12px; bottom: 10px;
-  font-family: var(--font-mono); font-size: 10px;
+  font-family: var(--font-mono); font-size: 12px;
   letter-spacing: .08em; text-transform: uppercase;
   color: var(--ink-3);
 }
 .stage-readout {
   position: absolute; right: 12px; top: 11px;
-  font-family: var(--font-mono); font-size: 10.5px;
+  font-family: var(--font-mono); font-size: 12.5px;
   letter-spacing: .05em;
   color: var(--ink-3);
   text-align: right;
@@ -302,7 +302,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   margin-bottom: 22px;
 }
 .sec-head h2 { font-size: 20px; letter-spacing: -.01em; }
-.sec-head .tag { margin-left: auto; }
+.sec-head .tag { margin-left: auto; font-size: 13px; }
 
 /* ---------- Filters ---------- */
 .filters { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -2171,14 +2171,14 @@ function towerMarkup(pre, opts) {
   var blades = FAN_BLADES.map(function (d) { return '<path d="' + d + '"/>'; }).join("");
 
   var labels = opts.labels ? (
-    '<g font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing=".08em" fill="var(--ink-3)">' +
-      '<text x="66" y="133">HOT RETURN</text>' +
-      '<text x="66" y="286">COLD SUPPLY</text>' +
-      '<text x="334" y="203">MAKEUP</text>' +
-      '<text x="336" y="259">BLOWDOWN</text>' +
-      '<text x="292" y="128">DRIFT ELIM.</text>' +
-      '<text x="292" y="182">FILL</text>' +
-      '<text x="240" y="96" fill="var(--teal)">FAN</text>' +
+    '<g font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing=".02em" fill="var(--ink-3)">' +
+      '<text x="66" y="133">Hot return</text>' +
+      '<text x="66" y="286">Cold supply</text>' +
+      '<text x="334" y="203">Makeup</text>' +
+      '<text x="336" y="259">Blowdown</text>' +
+      '<text x="292" y="128">Drift elim.</text>' +
+      '<text x="292" y="182">Fill</text>' +
+      '<text x="240" y="96" fill="var(--teal)">Fan</text>' +
     '</g>') : "";
 
   return '' +

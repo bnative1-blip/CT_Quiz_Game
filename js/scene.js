@@ -31,14 +31,14 @@ function towerMarkup(pre, opts) {
   var blades = FAN_BLADES.map(function (d) { return '<path d="' + d + '"/>'; }).join("");
 
   var labels = opts.labels ? (
-    '<g font-family="IBM Plex Mono, monospace" font-size="8.5" letter-spacing=".08em" fill="var(--ink-3)">' +
-      '<text x="66" y="133">HOT RETURN</text>' +
-      '<text x="66" y="286">COLD SUPPLY</text>' +
-      '<text x="334" y="203">MAKEUP</text>' +
-      '<text x="336" y="259">BLOWDOWN</text>' +
-      '<text x="292" y="128">DRIFT ELIM.</text>' +
-      '<text x="292" y="182">FILL</text>' +
-      '<text x="240" y="96" fill="var(--teal)">FAN</text>' +
+    '<g font-family="IBM Plex Mono, monospace" font-size="9" letter-spacing=".02em" fill="var(--ink-3)">' +
+      '<text x="66" y="133">Hot return</text>' +
+      '<text x="66" y="286">Cold supply</text>' +
+      '<text x="334" y="203">Makeup</text>' +
+      '<text x="336" y="259">Blowdown</text>' +
+      '<text x="292" y="128">Drift elim.</text>' +
+      '<text x="292" y="182">Fill</text>' +
+      '<text x="240" y="96" fill="var(--teal)">Fan</text>' +
     '</g>') : "";
 
   return '' +
