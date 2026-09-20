@@ -779,7 +779,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .quiz-grid {
   display: flex;
   flex-direction: column;
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
 }
 .quiz-grid .quiz { max-width: none; margin: 0; padding-top: 22px; }
@@ -791,25 +791,30 @@ button { font: inherit; color: inherit; cursor: pointer; }
   top: 63px;                       /* clears the rail and its level track */
   z-index: 20;
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-columns: auto 1px minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) auto auto minmax(0, 1fr);
-  column-gap: 22px;
+  column-gap: 20px;
   row-gap: 8px;
   padding: 14px 0 13px;
   background: var(--ground);
   border-bottom: 1px solid var(--line);
 }
-.rig-stage { grid-area: 1 / 1 / 5 / 2; height: 204px; }
+/* The tower takes the height the viewport can spare rather than a fixed
+   size, so it fills the room the question column does not need. */
+.rig-stage {
+  grid-area: 1 / 1 / 5 / 2;
+  /* The text below the tower is a near-fixed ~500px tall, so size the
+     tower from what the viewport has left over, not from a vh fraction
+     (which starves a short window and overflows it). */
+  height: clamp(150px, calc(100vh - 592px), 350px);
+  aspect-ratio: 400 / 340;
+  width: auto;
+}
+.rig-rule { grid-area: 1 / 2 / 5 / 3; background: var(--line); margin: 10px 0; }
 /* status and log ride the vertical centre of the tower rather than
    stranding a single line at the top of an empty column */
-.rig-status { grid-area: 2 / 2 / 3 / 3; padding-left: 12px; }
-.rig-log { grid-area: 3 / 2 / 4 / 3; overflow: hidden; padding-left: 12px; }
-/* one continuous rule beside the tower, not a segment per grid item */
-.rig::after {
-  content: ""; position: absolute;
-  left: 251px; top: 22px; bottom: 21px; width: 1px;
-  background: var(--line);
-}
+.rig-status { grid-area: 2 / 3 / 3 / 4; }
+.rig-log { grid-area: 3 / 3 / 4 / 4; overflow: hidden; }
 
 .rig-stage {
   position: relative;
@@ -953,10 +958,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .residual.held .residual-fill { background: var(--line-2); }
 
 @media (max-width: 620px) {
-  .rig { grid-template-columns: 148px minmax(0, 1fr); column-gap: 14px; }
-  .rig-stage { height: 126px; }
-  .rig-status, .rig-log { padding-left: 9px; }
-  .rig::after { left: 155px; }
+  .rig { column-gap: 13px; }
+  .rig-stage { height: clamp(104px, calc(100vh - 690px), 152px); }
   .rig-log li { font-size: 9.5px; }
 }
 
@@ -1199,6 +1202,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
         <canvas id="rigFx"></canvas>
         <svg id="rigSvg" viewBox="0 0 400 340" fill="none" aria-hidden="true"></svg>
       </div>
+      <span class="rig-rule" aria-hidden="true"></span>
       <div class="rig-status" id="rigStatus">
         <span class="rig-dot"></span><span id="rigText">Unit CT-1 &middot; nominal</span>
       </div>
