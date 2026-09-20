@@ -426,7 +426,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 }
 .aside h4 {
   font-family: var(--font-mono);
-  font-size: 10px; font-weight: 600;
+  font-size: 12px; font-weight: 600;
   letter-spacing: .13em; text-transform: uppercase;
   color: var(--ink-3);
   margin-bottom: 11px;
@@ -434,14 +434,14 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .term-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .term-list li {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.4;
   color: var(--ink-2);
   padding-left: 13px;
   position: relative;
 }
 .term-list li::before {
-  content: ""; position: absolute; left: 0; top: 7px;
+  content: ""; position: absolute; left: 0; top: 8px;
   width: 5px; height: 5px; background: var(--teal);
 }
 .brief-foot {
@@ -837,7 +837,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .rig-status {
   display: flex; align-items: center; gap: 8px;
-  font-family: var(--font-mono); font-size: 10.5px;
+  font-family: var(--font-mono); font-size: 12.5px;
   letter-spacing: .06em; text-transform: uppercase;
   color: var(--ink-3);
 }
@@ -849,7 +849,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 .rig-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .rig-log li {
-  font-family: var(--font-mono); font-size: 10.5px; line-height: 1.45;
+  font-family: var(--font-mono); font-size: 12px; line-height: 1.45;
   color: var(--bad);
   padding-left: 13px; position: relative;
   animation: rise .35s cubic-bezier(.2,.8,.25,1) backwards;
@@ -960,7 +960,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (max-width: 620px) {
   .rig { column-gap: 13px; }
   .rig-stage { height: clamp(104px, calc(100vh - 690px), 152px); }
-  .rig-log li { font-size: 9.5px; }
+  .rig-log li { font-size: 11px; }
 }
 
 /* ---------- Motion ---------- */
